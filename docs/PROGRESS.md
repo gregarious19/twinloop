@@ -84,8 +84,15 @@ ENV OK
 Surprises: another process on the host (not ours) holds ~38 GB of GPU memory (`nvidia-smi`), relevant to the ~70 GB GPU budget for training. The image pull took > 10 min.
 
 ## In progress
-T01: download running in container `twinloop-download` (started 2026-10-24 ~20:03 IST, dataset `xiaoweixumedicalai/imagecas`, 89.1 GB). Check: `docker logs --tail 5 twinloop-download` (done when it prints `DOWNLOAD DONE`, then `docker rm twinloop-download`). Next for T01: run `bash scripts/join_split_zips.sh` on the host (split archives, D32), then steps 5–7 (manifest) after T03 provides `twinloop.io`.
-Download progress (20:08 IST): ~6 MB/s of 83 GB -> ETA about 4 h (about 00:00 IST). Tip: the log is one huge tqdm line, use `docker logs --tail 1 twinloop-download | tail -c 150`.\nNext task that does not need data: T04 (pipeline + CLI).
+**T01 (ImageCAS download) is running** in detached container `twinloop-download` (dataset `xiaoweixumedicalai/imagecas`, 83 GB; ~7 MB/s; started ~20:03 IST; at 20:19 IST it was 7 % done; ETA about 23:30-00:00 IST on 2026-10-24). It survives the session.
+Resume order:
+1. `docker logs --tail 1 twinloop-download | tail -c 150` -> done when `docker ps -a --filter name=twinloop-download` shows `Exited (0)` and the log ends with `SPLIT ARCHIVES PRESENT ...` then `DOWNLOAD DONE`. If it exited non-zero, paste the last 30 log lines here and rerun `./scripts/dkd twinloop-download bash scripts/download_imagecas.sh xiaoweixumedicalai/imagecas` (re-downloads everything; that is accepted by TASKS T01 step 4). Then `docker rm twinloop-download`.
+2. `bash scripts/join_split_zips.sh` on the HOST (D32: split zips; needs host `zip`/`unzip`, both present). Expect 5 directories `~/twinloop-data/raw/imagecas/{1-200,201-400,401-600,601-800,801-1000}/`, each with a `.extracted` marker. Look at the extracted layout (file names) before writing the manifest: SPEC §4.2 says case_id = first integer in the basename and a basename containing `label` is a label.
+3. T01 steps 5-7: write `scripts/make_manifest.py` (uses `twinloop.io.load_image`, `Pool(8)`), run it, check the acceptance numbers (990-1000 cases, ~800/200 split, size_x == size_y == 512), commit.
+4. T04 step 5: first 3 train cases with their label masks through the CLI (`OK ...` lines; sanity ranges in TASKS T04 step 5). Do not tune parameters on data.
+5. Then T05 (nnU-Net conversion, preprocessing, benchmark, launch training), T08, T09 (wait), T10, T11, T12.
+Only one detached training container may exist (`twinloop-train`); never `docker rm -f` it while running.
+Server container `twinloop-server` is currently running (127.0.0.1:8000); restart with `bash scripts/run_server.sh` after code changes.
 
 ## BLOCKED
 (none)
