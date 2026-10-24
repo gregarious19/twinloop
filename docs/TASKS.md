@@ -153,7 +153,7 @@ Expected like `1000 {'train': 800, 'test': 200} [512] {...min ~0.29, max ~0.45..
 
 ---
 
-## [ ] T05 — nnU-Net dataset, preprocessing, epoch benchmark, launch training (background)
+## [x] T05 — nnU-Net dataset, preprocessing, epoch benchmark, launch training (background)
 **Depends on:** T01, T04
 **Files:** `scripts/convert_to_nnunet.py`, `scripts/train.sh`
 **Steps:**

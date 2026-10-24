@@ -3,6 +3,15 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T05 — nnU-Net dataset, preprocessing, benchmark, training launched (2026-10-24)
+Files: `scripts/convert_to_nnunet.py`, `scripts/train.sh`. Decisions: D40, D41.
+```
+ls .../imagesTr | wc -l   # 800  (labelsTr 800, imagesTs 200, labelsTs 200; dataset.json numTraining 800)
+nnUNetv2_plan_and_preprocess -d 501 -c 3d_fullres --verify_dataset_integrity -np 4   # exit 0, 800 cases in 58 min; nnUNetPlans.json exists
+benchmark nnUNetTrainer_5epochs: epoch times 143.5 (compile), 104.6, 104.4, 104.6, 104.6 s  -> t = 104.5 s
+```
+Chosen: `nnUNetTrainer` (1000 epochs), est. 31.9 h with the 1.1 margin. **Training start 2026-10-24 19:38 UTC; expected end about 2026-10-26 ~01:00 UTC** (1000 × ~105-108 s, plus final validation). Epoch 3 reached at 19:45 with train_loss -0.54 and pseudo-Dice 0.58 (just a progress sign, not a result). Container `twinloop-train`; resume after a crash/reboot with `bash scripts/train.sh nnUNetTrainer --c`. Kill rule: after epoch 50 if EMA pseudo-Dice < 0.30, stop.
+
 ### T01 — ImageCAS download and manifest (2026-10-24)
 Files: `scripts/make_manifest.py` (SPEC §4.2). Download finished with `DOWNLOAD DONE`; the data came as 5 split zips (`1-200` … `801-1000`, last part `*.change2zip`), joined and extracted with `bash scripts/join_split_zips.sh` (`JOIN DONE`). Originals kept under `/data/raw/imagecas/`. Files are `<id>.img.nii.gz` / `<id>.label.nii.gz`.
 Verification:
