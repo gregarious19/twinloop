@@ -3,6 +3,17 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T01 — ImageCAS download and manifest (2026-10-24)
+Files: `scripts/make_manifest.py` (SPEC §4.2). Download finished with `DOWNLOAD DONE`; the data came as 5 split zips (`1-200` … `801-1000`, last part `*.change2zip`), joined and extracted with `bash scripts/join_split_zips.sh` (`JOIN DONE`). Originals kept under `/data/raw/imagecas/`. Files are `<id>.img.nii.gz` / `<id>.label.nii.gz`.
+Verification:
+```
+./scripts/dk python scripts/make_manifest.py --root /data/raw/imagecas --out /data/raw/imagecas/manifest.csv
+cases=1000 train=800 test=200 unpaired=0
+1000 {'train': 800, 'test': 200} [512] size_y [512]; spacing_x min 0.289 max 0.465; spacing_z 0.5 (min=max); all image/label paths exist
+ruff check: All checks passed!; ruff format --check: 23 files already formatted
+```
+Manifest took 75 s. `/data/raw/` is now frozen (manifest exists).
+
 ### T07 — Web viewer (2026-10-24)
 Files: `app/static/index.html`, `app.js`, `style.css`, `color.js` (D37), `vendor/three.module.js` + `vendor/OrbitControls.js` (three.js r160 from the SPEC URLs, unmodified).
 Verification commands and output (server restarted with `bash scripts/run_server.sh`):
@@ -37,7 +48,13 @@ Verification commands and output:
 OK case_id=c20261024144113_6ae41c trees=1 lesions=1 min_ffr=0.945 total_s=0.1
 ```
 Full suite: 41 passed; ruff check and format --check clean.
-**Step 5 (real-data slice, first 3 train cases with their label masks) is PENDING T01** (ImageCAS still downloading). Do it once the manifest exists; T04 acceptance for real data is not yet shown.
+Step 5 (real-data slice, train cases 1, 2, 3 with their label masks), run after T01:
+```
+OK case_id=c20261024172233_7c0945 trees=2 lesions=5 min_ffr=0.484 total_s=5.1
+OK case_id=c20261024172239_6903cf trees=2 lesions=1 min_ffr=0.954 total_s=5.1
+OK case_id=c20261024172246_d2a991 trees=2 lesions=4 min_ffr=0.913 total_s=4.9
+```
+Sanity: all have 2 trees, converged, hyperemic root flow 93–320 mL/min (limit 50–400), total about 5 s (< 60 s). **One value outside the 0.5–1.0 sanity range:** case 1 min_ffr 0.484, from lesion L4 (DS 64.7 %, r_min 0.465 mm, r_ref 1.318 mm, in a small distal branch tree_0_b6). It follows from the model on that mask, not from an orientation or unit error that I could find; no parameters were changed. Unvalidated value, not a clinical statement.
 
 ### T03 — I/O, phantoms, centerlines, lesions (2026-10-24)
 Files: `src/twinloop/io.py`, `phantom.py` (incl. `write_dicom_series`, `python -m twinloop.phantom`), `centerline.py` (`extract_trees`), `lesions.py`, `tests/test_io.py`, `test_centerline.py`, `test_lesions.py`.

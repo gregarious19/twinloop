@@ -45,7 +45,7 @@ Status markers: change `[ ]` to `[x]` only after verification passes and the out
 
 ---
 
-## [ ] T01 — Download ImageCAS (background) and build the manifest
+## [x] T01 — Download ImageCAS (background) and build the manifest
 **Depends on:** T00 (steps 1–4); steps 5–7 also need `twinloop.io` from T03 — do them after T03 if the download finishes earlier.
 **Files:** `scripts/download_imagecas.sh`, `scripts/make_manifest.py`
 **Owner action (done):** the owner saved a new-style Kaggle API token (a single string) at `~/.kaggle/access_token` (chmod 600). There is no `kaggle.json`. Never print, echo, cat or log the token.
