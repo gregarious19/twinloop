@@ -3,6 +3,19 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T06 — Job runner and HTTP API (2026-10-24)
+Files: `app/jobs.py`, `app/server.py`, `app/static/index.html` (placeholder), `scripts/run_server.sh`, `tests/test_api.py`.
+Verification commands and output:
+```
+./scripts/dk pytest -q tests/test_api.py      # 17 passed, 1 warning (starlette: httpx vs httpx2 deprecation, harmless)
+bash scripts/run_server.sh
+{"status":"ok","cuda":true,"model_available":false,"queue_length":0}
+ss -ltnp | grep 8000
+LISTEN 0 4096 127.0.0.1:8000 0.0.0.0:*
+```
+Also: curl upload of the stenosis phantom image + mask -> `{"case_id":"c20261024144253_3287fe","status":"queued"}` -> `done` in 0.1 s; the T04 CLI case appears in `GET /api/cases`; `GET /` returns 200. The server container `twinloop-server` is left running.
+Decisions: D35, D36.
+
 ### T04 — Pipeline + result.json + CLI (2026-10-24)
 Files: `src/twinloop/schema.py`, `casefiles.py`, `pipeline.py`, `segmentation.py` (stub: `model_available()` real, `segment_nnunet()` raises the not-available error), `tests/test_pipeline_phantom.py`.
 Verification commands and output:

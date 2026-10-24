@@ -180,7 +180,7 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
 
 ---
 
-## [ ] T06 — Job runner and HTTP API
+## [x] T06 — Job runner and HTTP API
 **Depends on:** T04
 **Files:** `app/jobs.py`, `app/server.py`, `tests/test_api.py`, `scripts/run_server.sh`
 **Steps:**
