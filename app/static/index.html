@@ -1,1 +1,62 @@
-<h1>TwinLoop</h1>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TwinLoop CT-FFR (research prototype)</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./static/style.css">
+  <script type="importmap">{"imports":{"three":"./static/vendor/three.module.js"}}</script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>TwinLoop CT-FFR (research prototype)</h1>
+  </header>
+  <div id="disclaimer" class="disclaimer" role="note">Research prototype. FFR values are not validated against invasive measurements. Not for clinical use.</div>
+  <div id="offline" class="offline" hidden>Server not reachable — retrying…</div>
+
+  <main class="layout">
+    <aside class="panel left">
+      <form id="upload-form" autocomplete="off">
+        <label>CCTA scan (.nii.gz, .nii or zipped DICOM)
+          <input type="file" id="image" name="image" accept=".nii,.nii.gz,.zip" required>
+        </label>
+        <label>Optional segmentation mask (.nii.gz) — for testing
+          <input type="file" id="mask" name="mask" accept=".nii,.nii.gz">
+        </label>
+        <label>Aortic pressure (mmHg)
+          <input type="number" id="pressure" name="aortic_pressure_mmhg" value="90" min="60" max="140" step="1">
+        </label>
+        <button type="submit" id="analyze">Analyze</button>
+        <div id="upload-progress" class="progress" hidden>
+          <div class="bar"><div id="upload-bar"></div></div>
+          <span id="upload-text">Uploading… 0%</span>
+        </div>
+        <p id="form-error" class="form-error" role="alert"></p>
+      </form>
+      <h2>Cases</h2>
+      <ul id="case-list" class="case-list"></ul>
+    </aside>
+
+    <section class="stage" id="stage">
+      <div id="state" class="state"></div>
+      <div id="canvas-wrap" class="canvas-wrap" hidden>
+        <div id="legend" class="legend" hidden></div>
+        <div id="tooltip" class="tooltip" hidden></div>
+      </div>
+    </section>
+
+    <aside class="panel right" id="results-panel" hidden>
+      <div id="summary" class="summary"></div>
+      <h2>Lesions</h2>
+      <table id="lesion-table" class="lesions">
+        <thead>
+          <tr><th>ID</th><th>Branch</th><th>DS %</th><th>Length mm</th><th>FFR proximal</th><th>FFR distal</th><th>ΔFFR</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </aside>
+  </main>
+  <script type="module" src="./static/app.js"></script>
+</body>
+</html>

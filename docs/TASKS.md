@@ -203,7 +203,7 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
 
 ---
 
-## [ ] T07 — Web viewer
+## [x] T07 — Web viewer
 **Depends on:** T06
 **Files:** `app/static/index.html`, `app/static/app.js`, `app/static/style.css`, `app/static/vendor/three.module.js`, `app/static/vendor/OrbitControls.js`, `scripts/ui_smoke.py` (optional, see step 5)
 **Steps:**

@@ -3,6 +3,17 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T07 — Web viewer (2026-10-24)
+Files: `app/static/index.html`, `app.js`, `style.css`, `color.js` (D37), `vendor/three.module.js` + `vendor/OrbitControls.js` (three.js r160 from the SPEC URLs, unmodified).
+Verification commands and output (server restarted with `bash scripts/run_server.sh`):
+```
+curl -s http://127.0.0.1:8000/ | grep -c "TwinLoop CT-FFR"                                    # 2   (>= 1)
+curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/static/vendor/three.module.js     # 200
+node --check app/static/app.js                                                                 # (no output, passes)
+```
+Extra checks beyond the task: `ffrColor` returns exactly #d73027 / #fee08b / #1a9850 / #4575b4 at 0.70 / 0.80 / 0.90 / 1.00 and clamps outside (plain node test). A headless Chromium 145 (existing Playwright download, driven over CDP; D38) uploaded the stenosis phantom + mask and showed: title, always-visible disclaimer banner, summary (min FFR 0.94, 1 lesion), lesion row `L1 | tree_0_b0 | 42.4 | 6.5 | 0.99 | 0.95 | 0.05`, legend, a 762x631 WebGL canvas, clicking L1 places the white marker, clicking the tube shows `FFR 0.98 · ⌀ 1.6 mm · tree_0_b0`, and zero console errors. Also checked in the browser: unsupported file -> red text "Only .nii.gz, .nii or .zip files are supported"; image without mask (no model) -> red box "Segmentation model not available; provide a mask or finish training" + "Try another file" button; fetch failure -> grey banner "Server not reachable — retrying…", which clears on recovery.
+Not verified by me: the spinner / upload progress bar visuals (the phantom finishes in 0.1 s), the < 900 px narrow layout, Firefox/Safari. See the owner checklist.
+
 ### T06 — Job runner and HTTP API (2026-10-24)
 Files: `app/jobs.py`, `app/server.py`, `app/static/index.html` (placeholder), `scripts/run_server.sh`, `tests/test_api.py`.
 Verification commands and output:
@@ -90,6 +101,13 @@ Needs from owner (if any): ...
 -->
 
 ## Notes for next session
+### Owner manual UI checklist (T07) — please do this once
+1. Open http://127.0.0.1:8000 (start with `bash scripts/run_server.sh` if needed). The yellow disclaimer banner must be visible at all times.
+2. Upload `~/twinloop-data/runs/phantom/stenosis_img.nii.gz` with `stenosis_mask.nii.gz` as the optional mask -> a tube coloured blue (proximal) to green/yellow, lesion L1 in the table.
+3. Click L1 -> the camera moves to it and a white sphere appears. Click the tube -> tooltip like `FFR 0.98 · ⌀ 1.6 mm · tree_0_b0`.
+4. Upload a larger file (a real ImageCAS image once available) and watch the progress bar and the spinner labels (Waiting in queue / Reading scan / Finding coronary arteries / Measuring vessels / Computing FFR).
+5. Stop the server mid-poll (`docker stop twinloop-server`) -> grey banner "Server not reachable — retrying…"; start it again -> banner disappears.
+6. Shrink the window below 900 px: panels stack vertically.
 - Never run `ruff format .` on files other than code without `extend-exclude = ["docs"]` in place (it is now in pyproject.toml). Before that fix, ruff rewrote code blocks in docs/SPEC.md and docs/TASKS.md; they were restored to the original text (752 / 302 lines). There is no git baseline for the docs because the first commit came after that, so if the docs look odd, compare line counts.
 - `docker build` takes ~3 min after the first time (layers cached). The base image is 25 GB.
 - Kaggle auth is untested (T01 step 0).
