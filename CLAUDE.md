@@ -3,7 +3,7 @@
 ## Mission
 Build TwinLoop v1: a research prototype that takes a coronary CT angiography scan (NIfTI or zipped DICOM), segments the coronary arteries with nnU-Net v2, extracts vessel centerlines and radii, solves a steady-state 1D blood-flow model, and shows a 3D coronary tree coloured by CT-FFR in a local web app. Goal: a cheap, fast alternative to HeartFlow for Indian hospitals. There is no invasive-FFR ground truth: FFR values are unvalidated and must never be presented as accurate.
 
-**Done** = every task in docs/TASKS.md is `[x]` with verification output in docs/PROGRESS.md: container builds, all tests and lint pass, nnU-Net trained and evaluated on the ImageCAS test split (reports/RESULTS.md), and an uploaded scan renders as a coloured FFR tree at http://127.0.0.1:8000 in under 5 minutes.
+**Done** = every task in docs/TASKS.md is `[x]` with verification output in docs/PROGRESS.md: container builds, all tests and lint pass, nnU-Net trained and evaluated on the ImageCAS test split (reports/RESULTS.md), and an uploaded scan renders as a coloured FFR tree at http://127.0.0.1:8010 in under 5 minutes.
 
 Full design: docs/SPEC.md. Task list: docs/TASKS.md. Decisions: docs/DECISIONS.md. Status: docs/PROGRESS.md.
 
@@ -25,7 +25,7 @@ docker build -t twinloop:dev .                          # build image
 ./scripts/dk ruff check . && ./scripts/dk ruff format --check .   # lint
 ./scripts/dk ruff format .                              # format
 ./scripts/dk python -m twinloop.pipeline --image /data/... [--mask /data/...]  # CLI
-bash scripts/run_server.sh                              # web app -> http://127.0.0.1:8000
+bash scripts/run_server.sh                              # web app -> http://127.0.0.1:8010
 ./scripts/dkd <twinloop-name> <cmd...>                  # detached long job
 docker logs --tail 20 twinloop-train                    # training progress
 ```

@@ -1,4 +1,4 @@
-"""FastAPI server (SPEC §6.5). Local only: the host publishes 127.0.0.1:8000."""
+"""FastAPI server (SPEC §6.5). Local only: the host publishes 127.0.0.1:8010."""
 
 import json
 import os

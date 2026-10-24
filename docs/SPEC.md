@@ -25,7 +25,7 @@ TwinLoop is a research prototype that estimates CT-derived fractional flow reser
 **Definition of done for v1:**
 - `docker` image builds on the DGX Spark; all unit/integration tests pass; `ruff` is clean.
 - nnU-Net trained on ImageCAS (single fold), evaluated on the held-out test split, numbers in `reports/RESULTS.md`.
-- A user can open `http://127.0.0.1:8000`, upload an ImageCAS `.nii.gz` (or zipped DICOM series) and within 5 minutes see the coloured FFR tree, click any vessel for its FFR value, and see a lesion table.
+- A user can open `http://127.0.0.1:8010`, upload an ImageCAS `.nii.gz` (or zipped DICOM series) and within 5 minutes see the coloured FFR tree, click any vessel for its FFR value, and see a lesion table.
 - Pipeline evaluation on 20 held-out cases is written to `reports/RESULTS.md`, including failures.
 
 **Honesty constraint:** there is NO invasive-FFR ground truth in this project. FFR values are **unvalidated**. Never write or display any claim of clinical accuracy. Every screen and every `result.json` carries the disclaimer string in §6.3.
@@ -121,7 +121,7 @@ exec docker run --rm $TTY_FLAG --gpus all --ipc=host \
 set -euo pipefail
 NAME="$1"; shift
 PORT_FLAG=()
-if [ "${1:-}" = "--port" ]; then PORT_FLAG=(-p 127.0.0.1:8000:8000); shift; fi
+if [ "${1:-}" = "--port" ]; then PORT_FLAG=(-p 127.0.0.1:8010:8010); shift; fi
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DATA="${TWINLOOP_DATA:-$HOME/twinloop-data}"
 mkdir -p "$DATA"
@@ -597,7 +597,7 @@ Worked example (truncated to 3 points per branch):
 - Case IDs must match `^c\d{14}_[0-9a-f]{6}$`, else 404 (prevents path traversal).
 - Stream uploads to disk in 1 MB chunks; abort with 413 past 1 GB.
 - If no mask is given and `model_available()` is false, the job still starts and fails with the segmentation error text (do not reject at upload).
-- Run: `uvicorn app.server:app --host 0.0.0.0 --port 8000` inside the container (host publishes only on 127.0.0.1).
+- Run: `uvicorn app.server:app --host 0.0.0.0 --port 8010` inside the container (host publishes only on 127.0.0.1).
 
 ### 6.6 Web UI (`app/static/`)
 Plain HTML/CSS/JS ES modules, no build step. three.js **0.160.0** vendored (no CDN at runtime):
@@ -671,7 +671,7 @@ User accounts/auth; multi-GPU or multi-user queues; PACS/DICOM networking; de-id
 | Lint | `./scripts/dk ruff check . && ./scripts/dk ruff format --check .` |
 | Format | `./scripts/dk ruff format .` |
 | Pipeline CLI | `./scripts/dk python -m twinloop.pipeline --image /data/... [--mask /data/...]` |
-| Server | `bash scripts/run_server.sh` then open `http://127.0.0.1:8000` |
+| Server | `bash scripts/run_server.sh` then open `http://127.0.0.1:8010` |
 | Training status | `docker logs --tail 50 twinloop-train` |
 
 `scripts/run_server.sh` (exact content):
@@ -679,14 +679,14 @@ User accounts/auth; multi-GPU or multi-user queues; PACS/DICOM networking; de-id
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-./scripts/dkd twinloop-server --port uvicorn app.server:app --host 0.0.0.0 --port 8000
+./scripts/dkd twinloop-server --port uvicorn app.server:app --host 0.0.0.0 --port 8010
 for i in $(seq 1 30); do
-  if out=$(curl -s http://127.0.0.1:8000/api/health); then echo "$out"; exit 0; fi
+  if out=$(curl -s http://127.0.0.1:8010/api/health); then echo "$out"; exit 0; fi
   sleep 1
 done
 echo "server did not start"; docker logs --tail 50 twinloop-server; exit 1
 ```
-(`--host 0.0.0.0` is inside the container; the host only publishes 127.0.0.1:8000.)
+(`--host 0.0.0.0` is inside the container; the host only publishes 127.0.0.1:8010.)
 
 ---
 

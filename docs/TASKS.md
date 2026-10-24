@@ -195,11 +195,11 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
    - `aortic_pressure_mmhg=200` → 400.
    - image without mask and no model → final status `failed`, error contains "Segmentation model not available".
    - unknown / malformed case id → 404; result before done → 409 (submit, then immediately request result — if it raced to done, skip that assertion).
-5. Run the server with `bash scripts/run_server.sh`; `curl -s http://127.0.0.1:8000/api/health`.
+5. Run the server with `bash scripts/run_server.sh`; `curl -s http://127.0.0.1:8010/api/health`.
 6. Commit.
 
-**Acceptance:** all API tests pass; server responds on 127.0.0.1:8000 only (`ss -ltnp | grep 8000` shows `127.0.0.1:8000`).
-**Verify:** `./scripts/dk pytest -q tests/test_api.py` → all passed; `curl -s http://127.0.0.1:8000/api/health` → `{"status":"ok","cuda":true,...}`.
+**Acceptance:** all API tests pass; server responds on 127.0.0.1:8010 only (`ss -ltnp | grep 8010` shows `127.0.0.1:8010`).
+**Verify:** `./scripts/dk pytest -q tests/test_api.py` → all passed; `curl -s http://127.0.0.1:8010/api/health` → `{"status":"ok","cuda":true,...}`.
 
 ---
 
@@ -211,8 +211,8 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
 2. Build the UI per SPEC §6.6: every state in the state table, the colour map, legend, tooltips, lesion table, case list. Plain ES modules. All fetch errors go through one `api()` helper that sets the "Server not reachable" banner.
 3. Colour function in JS must match: `ffrColor(0.70) = #d73027`, `ffrColor(0.80) = #fee08b`, `ffrColor(0.90) = #1a9850`, `ffrColor(1.0) = #4575b4`, linear in RGB between stops, clamped outside.
 4. Restart the server (`bash scripts/run_server.sh`).
-5. Automated checks: `curl -s http://127.0.0.1:8000/ | grep -c "TwinLoop CT-FFR"` ≥ 1; `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/static/vendor/three.module.js` = 200; if `node` exists on the host, `node --check app/static/app.js` passes. Optional: if `python -c "import playwright"` works inside or outside the container and a Chromium is available, write `scripts/ui_smoke.py` that uploads the stenosis phantom + mask, waits for "done", and saves `reports/ui_smoke.png`; otherwise skip and say so.
-6. Add to PROGRESS.md under "Notes for next session" an **owner manual checklist**: open http://127.0.0.1:8000 → upload `stenosis_img.nii.gz` + mask → see a tube coloured from blue to yellow/green, lesion L1 in the table, click L1 moves the camera, click tube shows the tooltip, banner visible; stop server mid-poll → grey banner appears.
+5. Automated checks: `curl -s http://127.0.0.1:8010/ | grep -c "TwinLoop CT-FFR"` ≥ 1; `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8010/static/vendor/three.module.js` = 200; if `node` exists on the host, `node --check app/static/app.js` passes. Optional: if `python -c "import playwright"` works inside or outside the container and a Chromium is available, write `scripts/ui_smoke.py` that uploads the stenosis phantom + mask, waits for "done", and saves `reports/ui_smoke.png`; otherwise skip and say so.
+6. Add to PROGRESS.md under "Notes for next session" an **owner manual checklist**: open http://127.0.0.1:8010 → upload `stenosis_img.nii.gz` + mask → see a tube coloured from blue to yellow/green, lesion L1 in the table, click L1 moves the camera, click tube shows the tooltip, banner visible; stop server mid-poll → grey banner appears.
 7. Commit.
 
 **Acceptance:** automated checks in step 5 pass.
@@ -291,7 +291,7 @@ TWINLOOP_NNUNET_TRAINER=nnUNetTrainer_5epochs ./scripts/dk pytest -q -m "gpu and
 1. README: what TwinLoop is (2 sentences + disclaimer), requirements (DGX Spark/ARM64, Docker, NGC access, Kaggle token), setup commands, how to run the server and CLI, how to resume training, results summary (link `reports/RESULTS.md`), known limitations (SPEC §5.4 and §5.5 lists + single-centre data + no validation), non-goals (SPEC §6.10).
 2. Restart the server with the final trainer. Through the API (curl), upload the first **test** image *without* a mask; poll until `done`; record total time (must be < 300 s) and min FFR in PROGRESS.md.
    ```
-   curl -s -F image=@<host path of imagesTs/ImageCAS_0005_0000.nii.gz> http://127.0.0.1:8000/api/cases
+   curl -s -F image=@<host path of imagesTs/ImageCAS_0005_0000.nii.gz> http://127.0.0.1:8010/api/cases
    ```
    (Use the smallest test `case_id` that exists.)
 3. Full checks: `./scripts/dk pytest -q`, `./scripts/dk pytest -q -m "gpu and data"`, `./scripts/dk ruff check .`, `./scripts/dk ruff format --check .`.

@@ -5,7 +5,7 @@
 set -euo pipefail
 NAME="$1"; shift
 PORT_FLAG=()
-if [ "${1:-}" = "--port" ]; then PORT_FLAG=(-p 127.0.0.1:8000:8000); shift; fi
+if [ "${1:-}" = "--port" ]; then PORT_FLAG=(-p 127.0.0.1:8010:8010); shift; fi
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DATA="${TWINLOOP_DATA:-$HOME/twinloop-data}"
 mkdir -p "$DATA"

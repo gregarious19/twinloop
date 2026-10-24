@@ -109,7 +109,7 @@ Resume order:
 4. T04 step 5: first 3 train cases with their label masks through the CLI (`OK ...` lines; sanity ranges in TASKS T04 step 5). Do not tune parameters on data.
 5. Then T05 (nnU-Net conversion, preprocessing, benchmark, launch training), T08, T09 (wait), T10, T11, T12.
 Only one detached training container may exist (`twinloop-train`); never `docker rm -f` it while running.
-Server container `twinloop-server` is currently running (127.0.0.1:8000); restart with `bash scripts/run_server.sh` after code changes.
+Server container `twinloop-server` is currently running (127.0.0.1:8010); restart with `bash scripts/run_server.sh` after code changes.
 
 ## BLOCKED
 (none)
@@ -126,7 +126,7 @@ Needs from owner (if any): ...
 
 ## Notes for next session
 ### Owner manual UI checklist (T07) — please do this once
-1. Open http://127.0.0.1:8000 (start with `bash scripts/run_server.sh` if needed). The yellow disclaimer banner must be visible at all times.
+1. Open http://127.0.0.1:8010 (start with `bash scripts/run_server.sh` if needed). The yellow disclaimer banner must be visible at all times.
 2. Upload `~/twinloop-data/runs/phantom/stenosis_img.nii.gz` with `stenosis_mask.nii.gz` as the optional mask -> a tube coloured blue (proximal) to green/yellow, lesion L1 in the table.
 3. Click L1 -> the camera moves to it and a white sphere appears. Click the tube -> tooltip like `FFR 0.98 · ⌀ 1.6 mm · tree_0_b0`.
 4. Upload a larger file (a real ImageCAS image once available) and watch the progress bar and the spinner labels (Waiting in queue / Reading scan / Finding coronary arteries / Measuring vessels / Computing FFR).
