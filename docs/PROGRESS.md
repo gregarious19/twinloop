@@ -3,6 +3,18 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T04 — Pipeline + result.json + CLI (2026-10-24)
+Files: `src/twinloop/schema.py`, `casefiles.py`, `pipeline.py`, `segmentation.py` (stub: `model_available()` real, `segment_nnunet()` raises the not-available error), `tests/test_pipeline_phantom.py`.
+Verification commands and output:
+```
+./scripts/dk pytest -q tests/test_pipeline_phantom.py     # 6 passed in 1.14s
+./scripts/dk python -m twinloop.phantom --kind stenosis --out /data/runs/phantom
+./scripts/dk python -m twinloop.pipeline --image /data/runs/phantom/stenosis_img.nii.gz --mask /data/runs/phantom/stenosis_mask.nii.gz
+OK case_id=c20261024144113_6ae41c trees=1 lesions=1 min_ffr=0.945 total_s=0.1
+```
+Full suite: 41 passed; ruff check and format --check clean.
+**Step 5 (real-data slice, first 3 train cases with their label masks) is PENDING T01** (ImageCAS still downloading). Do it once the manifest exists; T04 acceptance for real data is not yet shown.
+
 ### T03 — I/O, phantoms, centerlines, lesions (2026-10-24)
 Files: `src/twinloop/io.py`, `phantom.py` (incl. `write_dicom_series`, `python -m twinloop.phantom`), `centerline.py` (`extract_trees`), `lesions.py`, `tests/test_io.py`, `test_centerline.py`, `test_lesions.py`.
 Verification command:

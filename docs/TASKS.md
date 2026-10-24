@@ -131,7 +131,7 @@ Expected like `1000 {'train': 800, 'test': 200} [512] {...min ~0.29, max ~0.45..
 
 ---
 
-## [ ] T04 — Pipeline + result.json + CLI (first vertical slice)
+## [x] T04 — Pipeline + result.json + CLI (first vertical slice)
 **Depends on:** T03 (and T01 for step 5 only)
 **Files:** `src/twinloop/schema.py`, `src/twinloop/pipeline.py`, `src/twinloop/segmentation.py` (stub: `model_available()` and `segment_nnunet()` that raises the "Segmentation model not available…" RuntimeError), `tests/test_pipeline_phantom.py`
 **Steps:**
