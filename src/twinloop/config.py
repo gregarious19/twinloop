@@ -15,7 +15,7 @@ class CenterlineParams:
     resample_mm: float = 0.5
     position_sigma_mm: float = 1.0
     radius_sigma_mm: float = 0.75
-    radius_half_voxel_correction: bool = True
+    radius_half_voxel_correction: bool = False
 
 
 @dataclass(frozen=True)

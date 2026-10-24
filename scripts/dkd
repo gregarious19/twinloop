@@ -14,6 +14,7 @@ docker run -d --name "$NAME" "${PORT_FLAG[@]}" --gpus all --ipc=host \
   --user "$(id -u):$(id -g)" -e HOME=/tmp \
   -v "$REPO":/workspace/twinloop -v "$DATA":/data \
   -v "$HOME/.kaggle":/kaggle:ro -e KAGGLE_CONFIG_DIR=/kaggle \
+  -e KAGGLE_API_TOKEN="$(cat "$HOME/.kaggle/access_token" 2>/dev/null)" \
   -e nnUNet_raw=/data/nnUNet_raw -e nnUNet_preprocessed=/data/nnUNet_preprocessed \
   -e nnUNet_results=/data/nnUNet_results -e nnUNet_n_proc_DA=8 \
   -e nnUNet_compile="${nnUNet_compile:-true}" \

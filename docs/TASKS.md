@@ -96,7 +96,7 @@ Expected like `1000 {'train': 800, 'test': 200} [512] {...min ~0.29, max ~0.45..
 
 ---
 
-## [ ] T03 — I/O, phantoms, centerlines, lesions
+## [x] T03 — I/O, phantoms, centerlines, lesions
 **Depends on:** T02
 **Files:** `src/twinloop/io.py`, `src/twinloop/phantom.py`, `src/twinloop/centerline.py`, `src/twinloop/lesions.py`, `tests/test_io.py`, `tests/test_centerline.py`, `tests/test_lesions.py`
 **Steps:**

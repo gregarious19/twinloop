@@ -3,6 +3,21 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T03 — I/O, phantoms, centerlines, lesions (2026-10-24)
+Files: `src/twinloop/io.py`, `phantom.py` (incl. `write_dicom_series`, `python -m twinloop.phantom`), `centerline.py` (`extract_trees`), `lesions.py`, `tests/test_io.py`, `test_centerline.py`, `test_lesions.py`.
+Verification command:
+```
+./scripts/dk pytest -q tests/test_io.py tests/test_centerline.py tests/test_lesions.py
+```
+Output:
+```
+..........................                                               [100%]
+26 passed in 2.32s
+```
+Full suite 35 passed; `ruff check .` All checks passed!; `ruff format --check .` 14 files already formatted. `extract_trees` on y_tree: 0.1 s (limit 10 s).
+Measured on phantoms: tube length 58.4 mm, 1 branch; y_tree 3 branches, root median radius 2.04 mm, root starts at z=6.4; stenosis lesion DS 0.42 (true 0.50), length 6.5 mm, min at z=39.8 mm; tube has 0 lesions. Sanity check: with `ds_threshold` temporarily 0.95, 5 of 10 lesion tests failed (so they do detect changes); restored to 0.25.
+Decisions: D33 (half-voxel correction default False), D34 (interpretation notes).
+
 ### T02 — Config, schema stubs and the 1D solver (2026-10-24)
 Files: `src/twinloop/config.py` (SPEC §5.6 + `MMHG_TO_PA`), `centerline.py` (`Branch`, `VesselTree` only), `lesions.py` (`Lesion` only), `solver.py`, `tests/test_solver.py`.
 Verification command:
@@ -33,7 +48,8 @@ ENV OK
 Surprises: another process on the host (not ours) holds ~38 GB of GPU memory (`nvidia-smi`), relevant to the ~70 GB GPU budget for training. The image pull took > 10 min.
 
 ## In progress
-Next: T01 (ImageCAS download via Kaggle, detached) then T03. T01 steps 5–7 need `twinloop.io` from T03.
+T01: download running in container `twinloop-download` (started 2026-10-24 ~20:03 IST, dataset `xiaoweixumedicalai/imagecas`, 89.1 GB). Check: `docker logs --tail 5 twinloop-download` (done when it prints `DOWNLOAD DONE`, then `docker rm twinloop-download`). Next for T01: run `bash scripts/join_split_zips.sh` on the host (split archives, D32), then steps 5–7 (manifest) after T03 provides `twinloop.io`.
+Download progress (20:08 IST): ~6 MB/s of 83 GB -> ETA about 4 h (about 00:00 IST). Tip: the log is one huge tqdm line, use `docker logs --tail 1 twinloop-download | tail -c 150`.\nNext task that does not need data: T04 (pipeline + CLI).
 
 ## BLOCKED
 (none)
