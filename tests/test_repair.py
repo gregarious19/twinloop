@@ -124,3 +124,14 @@ def test_load_model_errors(tmp_path, monkeypatch):
     monkeypatch.setitem(sys.modules, "twinloop.nets", None)
     with pytest.raises(RuntimeError, match="v2 model not available: twinloop.nets not found"):
         load_model("gapfill", "cpu")
+
+
+def test_full_proba_pads_missing_classes():
+    from sklearn.ensemble import HistGradientBoostingClassifier
+
+    from twinloop.modelio import FullProba
+
+    X = np.random.default_rng(0).normal(size=(60, 3))
+    y = np.array([0, 1, 4] * 20)  # classes 2, 3, 5 never occur
+    p = FullProba(HistGradientBoostingClassifier(max_iter=5).fit(X, y), 6).predict_proba(X[:4])
+    assert p.shape == (4, 6) and np.allclose(p.sum(1), 1.0) and (p[:, [2, 3, 5]] == 0).all()

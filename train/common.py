@@ -90,3 +90,18 @@ def git_commit() -> str:
         return out.stdout.strip() or "unknown"
     except Exception:
         return "unknown"
+
+
+def last_elapsed(csv_path: str | Path) -> float:
+    """elapsed_s of the last row of a train_log.csv (0 if absent); used to resume timing."""
+    p = Path(csv_path)
+    if not p.exists():
+        return 0.0
+    rows = list(csv.DictReader(open(p)))
+    return float(rows[-1]["elapsed_s"]) if rows else 0.0
+
+
+def write_json(path: str | Path, obj: dict) -> None:
+    import json
+
+    Path(path).write_text(json.dumps(obj, indent=2))
