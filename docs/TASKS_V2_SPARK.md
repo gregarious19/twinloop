@@ -106,7 +106,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S05 — Metrics and the regression set
+## [x] S05 — Metrics and the regression set
 **Depends on:** S02
 **Files:** `src/twinloop/metrics.py`, `scripts/make_regression_set.py`, `reports/v2_regression_set.json`, `tests/test_metrics.py`
 **Steps:**

@@ -41,6 +41,13 @@ tests/test_anatomy_geometry.py + test_graph.py: 14 passed; full suite 81 passed;
 ```
 tests/test_cpr.py: 5 passed; ruff clean
 ```
+- [S05] 2026-10-25 — metrics.py, scripts/make_regression_set.py, reports/v2_regression_set.json — verification:
+```
+tests/test_metrics.py: 4 passed
+unique regression case ids: 20; rerun of make_regression_set.py exits 1 ("regression set already exists")
+case_ids: [236,124,44,914,8,14,752,742,836,144,688,4,366,744,352,6,34,38,68,82]
+```
+Notes: branch_recall / false_branch_rate / false_branches take `ref: sitk.Image` (or a sitk mask) because physical points need the grid; with no GT branches recall is 1.0 and false-branch rate 0.0.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

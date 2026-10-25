@@ -1,0 +1,25 @@
+{
+ "case_ids": [
+  236,
+  124,
+  44,
+  914,
+  8,
+  14,
+  752,
+  742,
+  836,
+  144,
+  688,
+  4,
+  366,
+  744,
+  352,
+  6,
+  34,
+  38,
+  68,
+  82
+ ],
+ "rule": "From v2_holdout: calcium = count of voxels with HU >= 800 inside (GT dilated by 4 vox) minus GT; n_lesions = v1 detect_lesions on the GT graph. Take the 10 highest calcium, then the 5 highest n_lesions not yet chosen, then the 5 lowest remaining case ids (ties broken by lower case id)."
+}
