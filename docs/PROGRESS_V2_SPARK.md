@@ -79,6 +79,7 @@ Decisions: D-V2-S10a.
 ```
 tests/test_lumen.py: 4 passed (stenosis min r 0.75±0.15, median 1.5±0.15 from wrong 3.0 mm v1 radii; all -10 model keeps radii and warns; branch < 10 mm unchanged; window starts)
 ```
+- [S17] 2026-10-25 — [x] skipped: ${TWINLOOP_DATA}/raw/mmwhs does not exist (only raw/imagecas).
 - [S12] 2026-10-25 — V2Options + v2 argument in run_pipeline, CLI flags, V2Out / CaseResult.v2 — verification:
 ```
 ./scripts/dk pytest -q -> 124 passed (tests/test_pipeline_v2.py: 5 new; test_cli_ok_and_failed now monkeypatches segment_anatomy)

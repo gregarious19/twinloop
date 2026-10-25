@@ -318,6 +318,6 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 ---
 
-## [ ] S17 — (Optional) TotalSegmentator error on MM-WHS
+## [x] S17 skipped — (Optional) TotalSegmentator error on MM-WHS
 **Depends on:** S01. **Skip** (mark `[x] skipped` with the reason in PROGRESS) unless `${TWINLOOP_DATA}/raw/mmwhs/` exists (the owner has not downloaded MM-WHS).
 **Steps (only if present):** for each MM-WHS CT training case with labels: run `segment_anatomy`; compare myocardium (MM-WHS label value 205) and ascending aorta (label 820) with Dice after cropping both masks to the bounding box of the MM-WHS aorta label in z; write `reports/v2_mmwhs.csv` (`case,dice_myo,dice_aorta,vol_myo_ts_ml,vol_myo_gt_ml`). Label values are UNCERTAIN: print `np.unique` of one label file first and adapt.
