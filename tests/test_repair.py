@@ -118,6 +118,9 @@ def test_load_model_errors(tmp_path, monkeypatch):
     g = tmp_path / "models" / "v2" / "gapfill"
     g.mkdir()
     (g / "config.json").write_text(json.dumps({"arch": "GapfillNet", "arch_kwargs": {}}))
+    import twinloop
+
+    monkeypatch.delattr(twinloop, "nets", raising=False)
     monkeypatch.setitem(sys.modules, "twinloop.nets", None)
     with pytest.raises(RuntimeError, match="v2 model not available: twinloop.nets not found"):
         load_model("gapfill", "cpu")

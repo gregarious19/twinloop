@@ -102,6 +102,11 @@ Observation: tree_0 min FFR moves by up to 0.15 between modes within one case (m
 df -h ~/twinloop-data: 3.7T total, 2.7T free (>= 100 GB needed: OK); nproc 20; free -g available 104 GB
 ```
 Decision D-V2-S (all training on SPARK).
+- [C01] 2026-10-26 — src/twinloop/nets.py (GapfillNet, LumenNet), train/common.py, tests/test_nets.py — verification:
+```
+tests/test_nets.py: 5 passed; full suite 129 passed; ruff check/format clean
+```
+Side fix: modelio.load_model now raises RuntimeError("v2 model not available: .../model.pt") if model.pt is missing; test_load_model_errors also drops the cached twinloop.nets attribute now that nets.py exists.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

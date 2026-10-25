@@ -32,6 +32,8 @@ def load_model(name: str, device: str):
         from twinloop import nets
     except ImportError as e:
         raise RuntimeError(f"{NOT_AVAILABLE}twinloop.nets not found") from e
+    if not (folder / "model.pt").is_file():
+        raise RuntimeError(f"{NOT_AVAILABLE}{folder / 'model.pt'}")
     kwargs = {k: tuple(v) if isinstance(v, list) else v for k, v in cfg["arch_kwargs"].items()}
     model = getattr(nets, cfg["arch"])(**kwargs)
     state = torch.load(folder / "model.pt", map_location=device, weights_only=True)

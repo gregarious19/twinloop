@@ -80,7 +80,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C01 — Network code and training utilities
+## [x] C01 — Network code and training utilities
 **Depends on:** C00
 **Files:** `src/twinloop/nets.py`, `train/__init__.py`, `train/common.py`, `tests/test_nets.py`
 **Steps:**
