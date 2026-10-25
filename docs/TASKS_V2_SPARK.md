@@ -44,7 +44,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S01 — TotalSegmentator anatomy + quality checks
+## [x] S01 — TotalSegmentator anatomy + quality checks
 **Depends on:** S00; owner has set the licence (for the highres part)
 **Files:** `src/twinloop/anatomy.py` (part 1: `Anatomy`, `run_totalseg`, `segment_anatomy`, qc), `tests/test_anatomy.py`
 **Steps:**

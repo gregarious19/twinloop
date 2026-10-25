@@ -18,9 +18,19 @@ import totalsegmentator, sklearn, pyarrow, joblib -> ok
 tests/test_v2_basics.py: 4 passed; ruff check/format clean
 role counts: Counter({'v2_train': 640, 'v2_holdout': 87, 'v2_realfail': 73})
 ```
+- [S01] 2026-10-25 — anatomy.py part 1 (Anatomy, run_totalseg, segment_anatomy, qc) — verification:
+```
+CPU: tests/test_anatomy.py 5 passed; full suite 67 passed; ruff clean
+GPU+data (case 2): 1 passed; myocardium 89.4 mL; sources all heartchambers_highres;
+qc {aorta_present: True, aorta_connected: False, myo_present: True, ostia_ok: False}
+TotalSegmentator wall: total (roi_subset aorta heart) 291 s incl. weight download; highres 1647 s incl. weight download (~2 min on rerun inside pytest)
+ls ts_highres: aorta heart_atrium_left heart_atrium_right heart_myocardium heart_ventricle_left heart_ventricle_right pulmonary_artery
+ls ts_total: aorta heart
+```
+Surprises: class names differ from spec (D-V2-S01a); aorta_connected False on a real case (SPEC ISSUE D-V2-S01c, test only reports it); concurrent TS runs corrupt weight download (D-V2-S01b).
 
 ## In progress
-WAITING ON OWNER: (1) ./scripts/dk totalseg_set_license -l <key>  (2) create the private git remote and push (SPEC §15)
+WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
 Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group membership not active in the session).
 
 ## BLOCKED
