@@ -95,6 +95,13 @@ tests/test_flow.py + tests/test_solver.py: 13 passed (worked example 98.0 / 49.0
 reports/v2_sensitivity.md: 20 rows (5 cases x 4 modes), cases 2, 3, 7, 9, 11
 ```
 Observation: tree_0 min FFR moves by up to 0.15 between modes within one case (median 0.03; case 11: 0.939 diameter law, 0.828 myocardial mass, 0.785 / 0.872 for mass x1.2 / x0.8). Resting MBF 1.0 mL/min/g kept (D-V2-S09a). FFR unvalidated.
+- [C00] 2026-10-26 — environment on SPARK (no venv; twinloop:v2 image) — verification:
+```
+./scripts/dk python -c "import torch,sklearn;print(torch.__version__,torch.cuda.is_available(),sklearn.__version__)"
+2.14.0a0+b2c75dd062.nv26.09 True 1.9.1
+df -h ~/twinloop-data: 3.7T total, 2.7T free (>= 100 GB needed: OK); nproc 20; free -g available 104 GB
+```
+Decision D-V2-S (all training on SPARK).
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

@@ -25,7 +25,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C00 — Read the cluster notes, build the environment
+## [x] C00 — Read the cluster notes, build the environment
 **Depends on:** SPARK S00 pulled (needs the pinned `requirements.txt`/`requirements.lock` and `config_v2.py`)
 **Files:** `cluster/SLURM_NOTES.md` (owner-filled; read only, except the "Extracted" section), `cluster/cluster.env`, `cluster/slurm_flags_gpu.txt`, `cluster/slurm_flags_cpu.txt`, `cluster/submit.sh`, `cluster/jobs/env_check.sh`, `requirements-cluster.txt`, `cluster/make_requirements.py`, `docs/PROGRESS_CLUSTER.md`, `docs/DECISIONS_CLUSTER.md`
 **Steps:**
