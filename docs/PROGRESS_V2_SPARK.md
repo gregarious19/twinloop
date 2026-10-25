@@ -62,6 +62,14 @@ OK case=7 trees=2 fragments=0 labels=['LAD', 'LCX', 'LM', 'RCA', 'other'] flags=
 ls $TWINLOOP_DATA/v2/inspect/*.json | wc -l -> 3
 ```
 Sanity (no parameters tuned, no bugs found): see Notes for next session.
+- [S08] 2026-10-25 — regions.py (propose_regions, region_features 31 features, label_synthetic/match_records, label_real), scripts/v2_region_stats.py — verification:
+```
+tests/test_regions.py: 6 passed
+v2_region_stats --n 10 (seed 0): matched/total per type: truncate 9/11, gap 12/16, shrink 13/14, delete_branch 0/11, false_branch 3/5, occlusion 3/3
+label counts: {'keep': 279, 'restore': 13, 'extend': 21, 'remove': 3, 'stop': 3}   (no 'add')
+mean regions per case 31.9; seconds per case 8.3
+```
+Surprise: SPEC ISSUE on mask_ahead_frac test (D-V2-S08a).
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
@@ -72,6 +80,10 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 
 ## Notes for next session
 <!-- Observations, sanity-check results, things the owner should look at, bug reports for CLUSTER. -->
+### S08 design-check observations (not tuned)
+- `delete_branch` (action `add`) matched 0/11: the decider's `add` class would get no synthetic positives from the current data. Examples (cases 2, 3, 7): the nearest probe region to the deleted branch's origin is 24.9, 22.3 and 48.5 mm away; only 10 probe regions exist in those 3 cases (2–5 per case). Probes are proposed every 5 mm on branches with r >= 1 mm, require a ray with mean HU >= 250 entirely outside the mask and are suppressed near junctions and each other, so the point at a deleted branch's origin is rarely probed. Owner/planner should decide whether to relax probe rules (SPEC change); I did not.
+- `gap` 12/16 and `false_branch` 3/5 unmatched cases not examined further (>= 50 %: no action required).
+
 ### S04 sanity observations (cases 2, 3, 7; GT masks)
 - All 3: 2 trees, 0 fragments, labels LM/LAD/LCX/RCA all present, no graph warnings. Myocardium 84–102 mL, aorta 86–114 mL.
 - `aorta_connected` False in 3/3 (known SPEC ISSUE D-V2-S01c: ascending/descending pieces).

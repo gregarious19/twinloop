@@ -146,7 +146,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S08 — Region proposals, features, labels
+## [x] S08 — Region proposals, features, labels
 **Depends on:** S06, S07 (uses `rmf` and `phys_to_index_zyx`)
 **Files:** `src/twinloop/regions.py`, `scripts/v2_region_stats.py`, `tests/test_regions.py`
 **Steps:**
