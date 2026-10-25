@@ -114,6 +114,7 @@ imagesTr 800 == labelsTr 800; splits_final.json exists; role counts Counter({'v2
 imagesTs/labelsTs exist on SPARK (v1 test split, normal here); the C-tasks never read them (`paths.case_image_path` rejects test ids).
 
 ## In progress
+- [C03] datasets running (started 2026-10-26 01:33 host time). Chain script `~/twinloop-data/v2/tmp/scr/chain_data.sh` runs gapfill -> lumen -> decider one after another; log `~/twinloop-data/v2/tmp/scr/chain_data.log`. Containers `twinloop-v2-data-gapfill`, then `-lumen`, then `-decider` (`docker logs --tail 20 <name>`; `docker inspect -f '{{.State.ExitCode}}' <name>`). Output `/data/v2/datasets/<name>/` (`_done_shard_NN` x20 each). Shards resume: if the chain died, rerun the same `dkd` command for the dataset that is not finished (case markers `_case_NNNN.done`). Do not edit train/make_*_data.py or train/shards.py while it runs.
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
 WAITING: v1 T09 not on main yet (main HEAD = 4e990d1 T05; training still running in twinloop-train). S12M, S13-S16 are blocked on it. S00-S12 are done; only S17 (optional, skipped unless raw/mmwhs exists) is open.
 Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group membership not active in the session).
