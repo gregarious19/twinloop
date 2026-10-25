@@ -75,6 +75,10 @@ Surprise: SPEC ISSUE on mask_ahead_frac test (D-V2-S08a).
 tests/test_repair.py: 6 passed (OracleNet closes the two_trees_gap gap: > 20 new voxels, one component fewer; all -10 net -> (mask, 0); run_repair applies an extend; gapfill=None -> flagged; load_model errors)
 ```
 Decisions: D-V2-S10a.
+- [S11] 2026-10-25 — lumen.py (refine_radii) — verification:
+```
+tests/test_lumen.py: 4 passed (stenosis min r 0.75±0.15, median 1.5±0.15 from wrong 3.0 mm v1 radii; all -10 model keeps radii and warns; branch < 10 mm unchanged; window starts)
+```
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

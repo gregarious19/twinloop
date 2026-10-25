@@ -196,7 +196,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S11 — Lumen refinement
+## [x] S11 — Lumen refinement
 **Depends on:** S07
 **Files:** `src/twinloop/lumen.py`, `tests/test_lumen.py`
 **Steps:**
