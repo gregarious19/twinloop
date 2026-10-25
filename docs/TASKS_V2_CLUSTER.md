@@ -112,7 +112,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C03 — Training datasets (Slurm CPU arrays)
+## [x] C03 — Training datasets (Slurm CPU arrays)
 **Depends on:** C01, C02, SPARK S06, S07, S08 pulled (check: `git log --oneline | grep -cE " S0(6|7|8):"` = 3)
 **Files:** `train/make_gapfill_data.py`, `train/make_lumen_data.py`, `train/make_decider_data.py`, `train/shards.py`, `cluster/jobs/make_data.sh`
 **Steps:**
@@ -159,7 +159,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C06 — Train the decider (synthetic)
+## [x] C06 — Train the decider (synthetic)
 **Depends on:** C03
 **Files:** `train/train_decider.py`, `cluster/jobs/train_decider.sh`
 **Steps:**

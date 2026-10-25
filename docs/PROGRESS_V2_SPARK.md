@@ -120,6 +120,16 @@ lumen:   20 _done_shard, 19634 branch files, 0 errors, 4.8 GB
 ```
 - [C04/C05 sanity] gap-filler PASS (init 1.6664, Dice 0.9973); lumen PASS (init 1.3663, Dice 1.0000); timing 0.302 s/step (gapfill) and 2.03 s/step (lumen), D-V2-C04b.
 
+- [C06] 2026-10-26 — decider trained, 3 seeds (container twinloop-v2-train-decider, CPU) — verification:
+```
+dataset: 20 shards, 36760 rows, 640 cases, 0 errors; labels keep 31732, extend 2257, restore 1302, remove 730, stop 568, add 171
+seed 0: train 0.7387, val 0.6321 PASS
+seed 1: train 0.7406, val 0.6381 PASS
+seed 2: train 0.7215, val 0.6301 PASS
+seed 0 per-class (val): see metrics.json; weakest classes add (F1 ~0.17-0.22) and stop (~0.49), extend precision ~0.37 (recall 0.84)
+```
+Note: sklearn's early_stopping='auto' is active for > 10 000 rows, so the 300-iteration fit stops after a few seconds; the spec fixes only max_iter, learning_rate, class_weight, random_state, so this was left as is.
+
 ## In progress
 - [C04/C05] GPU chain started 2026-10-26: `~/twinloop-data/v2/tmp/scr/chain_train.sh` (log `chain_train.log` next to it). Containers `twinloop-v2-train-gapfill` (seeds 0,1,2; ~3.4 h each) then `twinloop-v2-train-lumen` (seeds 0,1,2; ~17 h each). Runs in `/data/v2/runs/<model>/seed<k>/` (train_log.csv, ckpt.pt, best.pt, metrics.json). Seeds resume from ckpt.pt: if a container died, rerun the same loop for the model (`./scripts/dkd twinloop-v2-train-<m> bash -c 'for s in 0 1 2; do python -m train.train_<m> --data /data/v2/datasets/<m> --out /data/v2/runs/<m>/seed$s --seed $s; done'`) but only for seeds without metrics.json. Check: `docker logs --tail 20 <name>`, `docker inspect -f '{{.State.ExitCode}}' <name>`.
 - [C03] datasets running (started 2026-10-26 01:33 host time). Chain script `~/twinloop-data/v2/tmp/scr/chain_data.sh` runs gapfill -> lumen -> decider one after another; log `~/twinloop-data/v2/tmp/scr/chain_data.log`. Containers `twinloop-v2-data-gapfill`, then `-lumen`, then `-decider` (`docker logs --tail 20 <name>`; `docker inspect -f '{{.State.ExitCode}}' <name>`). Output `/data/v2/datasets/<name>/` (`_done_shard_NN` x20 each). Shards resume: if the chain died, rerun the same `dkd` command for the dataset that is not finished (case markers `_case_NNNN.done`). Do not edit train/make_*_data.py or train/shards.py while it runs.
