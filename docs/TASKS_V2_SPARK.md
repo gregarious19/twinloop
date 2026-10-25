@@ -177,7 +177,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S10 — Gap-filler inference and the repair loop
+## [x] S10 — Gap-filler inference and the repair loop
 **Depends on:** S08
 **Files:** `src/twinloop/gapfill.py`, `src/twinloop/repair.py`, `src/twinloop/modelio.py`, `tests/test_repair.py`
 **Steps:**

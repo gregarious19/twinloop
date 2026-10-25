@@ -70,6 +70,11 @@ label counts: {'keep': 279, 'restore': 13, 'extend': 21, 'remove': 3, 'stop': 3}
 mean regions per case 31.9; seconds per case 8.3
 ```
 Surprise: SPEC ISSUE on mask_ahead_frac test (D-V2-S08a).
+- [S10] 2026-10-25 — gapfill.py (extract_patch, apply_gapfill), modelio.py (load_model), repair.py (RepairAction, RulesDecider, run_repair) — verification:
+```
+tests/test_repair.py: 6 passed (OracleNet closes the two_trees_gap gap: > 20 new voxels, one component fewer; all -10 net -> (mask, 0); run_repair applies an extend; gapfill=None -> flagged; load_model errors)
+```
+Decisions: D-V2-S10a.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
