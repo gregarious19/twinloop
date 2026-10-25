@@ -45,3 +45,6 @@ ones at the end (prefix with the task ID). CLUSTER writes to docs/DECISIONS_CLUS
 
 ## Filled in during execution
 <!-- SPARK appends here: D-V2-S00a onward -->
+- D-V2-S00a — Container Python 3.12.3 (base nvcr.io/nvidia/pytorch:26.09-py3, torch 2.14.0a0+b2c75dd062.nv26.09, nnunetv2 2.8.1 unchanged).
+- D-V2-S00b — TotalSegmentator installed directly via requirements.txt (pip resolved without touching torch/nnunetv2; no-deps fallback not needed). Pins: scikit-learn==1.9.1, pyarrow==25.0.1, joblib==1.6.0, TotalSegmentator==2.18.0. Reason: S00 step 4–6. Side effect: certifi bumped 2026.7.22 → 2026.10.23 (harmless). `docker` needs `sg docker -c "..."` in this shell (user is in the docker group, session predates it).
+- D-V2-S00c — `torch==` is not printed by `pip freeze` (installed from a local wheel, appears as `torch @ file:///...`); the "unchanged" check compares `^(torch|nnunetv2)(==| @)` lines instead. Reason: spec grep pattern would match only nnunetv2.

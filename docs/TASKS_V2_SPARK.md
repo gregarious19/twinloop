@@ -16,7 +16,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S00 — v1 state check, dependencies, v2 scaffolding
+## [x] S00 — v1 state check, dependencies, v2 scaffolding
 **Depends on:** none
 **Files:** `requirements.txt`, `requirements.lock`, `Dockerfile` (only if the fallback is needed), `scripts/dk`, `scripts/dkd`, `src/twinloop/paths.py`, `src/twinloop/config_v2.py`, `src/twinloop/v2split.py`, `tests/test_v2_basics.py`, `docs/PROGRESS_V2_SPARK.md`
 **Steps:**

@@ -12,5 +12,7 @@ exec docker run --rm $TTY_FLAG --gpus all --ipc=host \
   -e nnUNet_raw=/data/nnUNet_raw -e nnUNet_preprocessed=/data/nnUNet_preprocessed \
   -e nnUNet_results=/data/nnUNet_results -e nnUNet_n_proc_DA=8 \
   -e nnUNet_compile="${nnUNet_compile:-true}" \
-  -e TWINLOOP_DATA=/data -e TWINLOOP_NNUNET_TRAINER="${TWINLOOP_NNUNET_TRAINER:-nnUNetTrainer}" \
-  -w /workspace/twinloop twinloop:dev "$@"
+  -e TWINLOOP_DATA=/data \
+  -e TOTALSEG_HOME_DIR=/data/totalseg \
+  -e TWINLOOP_NNUNET_TRAINER="${TWINLOOP_NNUNET_TRAINER:-nnUNetTrainer}" \
+  -w /workspace/twinloop twinloop:v2 "$@"

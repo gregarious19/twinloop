@@ -13,3 +13,7 @@ httpx==0.28.1
 kaggle==2.2.5
 pytest==9.1.1
 ruff==0.17.2
+scikit-learn==1.9.1
+pyarrow==25.0.1
+joblib==1.6.0
+TotalSegmentator==2.18.0
