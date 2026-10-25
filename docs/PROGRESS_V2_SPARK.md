@@ -28,6 +28,11 @@ ls ts_highres: aorta heart_atrium_left heart_atrium_right heart_myocardium heart
 ls ts_total: aorta heart
 ```
 Surprises: class names differ from spec (D-V2-S01a); aorta_connected False on a real case (SPEC ISSUE D-V2-S01c, test only reports it); concurrent TS runs corrupt weight download (D-V2-S01b).
+- [S02] 2026-10-25 — graph.py (build_graph, main_path, graph_summary, endings) + phantom kinds taper, two_trees_gap — verification:
+```
+tests/test_graph.py: 5 passed; full suite: 72 passed; ruff clean
+```
+Note: two_trees_gap removes only the tube voxels (x > 20 mm), so the second tree's cylinder at x=15 stays intact, per spec ("the tube's voxels").
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

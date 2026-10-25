@@ -49,6 +49,11 @@ def make_phantom(kind: str) -> tuple[sitk.Image, sitk.Image]:
             mask |= _cylinder(grid, junction, end, 1.5)
     elif kind == "two_trees":
         mask = _tube(grid, lambda z: 1.5) | _cylinder(grid, (15, 40, 10), (15, 40, 50), 1.2)
+    elif kind == "taper":
+        mask = _tube(grid, lambda z: 1.5 - 1.2 * (z - 10.0) / 60.0)
+    elif kind == "two_trees_gap":
+        mask = _tube(grid, lambda z: 1.5) | _cylinder(grid, (15, 40, 10), (15, 40, 50), 1.2)
+        mask &= ~((grid[2] >= 38.0) & (grid[2] <= 42.0) & (grid[0] > 20.0))
     else:
         raise ValueError(f"Unknown phantom kind: {kind}")
     mask_img = sitk.GetImageFromArray(mask.astype(np.uint8))

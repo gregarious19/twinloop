@@ -63,7 +63,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S02 — Vessel graph
+## [x] S02 — Vessel graph
 **Depends on:** S00
 **Files:** `src/twinloop/graph.py`, `src/twinloop/phantom.py` (add kinds only), `tests/test_graph.py`
 **Steps:**
