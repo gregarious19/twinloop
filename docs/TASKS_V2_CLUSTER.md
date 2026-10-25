@@ -100,7 +100,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C02 — Data arrives on the cluster
+## [x] C02 — Data arrives on the cluster
 **Depends on:** C00
 **Steps:**
 1. If `$TWINLOOP_DATA/nnUNet_raw/Dataset501_ImageCAS/imagesTr` is missing: `WAITING ON OWNER: rsync from SPEC §1 (SPARK → CLUSTER)`, and do C01 meanwhile.

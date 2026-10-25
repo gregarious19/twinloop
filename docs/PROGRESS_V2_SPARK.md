@@ -107,6 +107,11 @@ Decision D-V2-S (all training on SPARK).
 tests/test_nets.py: 5 passed; full suite 129 passed; ruff check/format clean
 ```
 Side fix: modelio.load_model now raises RuntimeError("v2 model not available: .../model.pt") if model.pt is missing; test_load_model_errors also drops the cached twinloop.nets attribute now that nets.py exists.
+- [C02] 2026-10-26 — data verified (local, no rsync) — verification:
+```
+imagesTr 800 == labelsTr 800; splits_final.json exists; role counts Counter({'v2_train': 640, 'v2_holdout': 87, 'v2_realfail': 73}) == S00
+```
+imagesTs/labelsTs exist on SPARK (v1 test split, normal here); the C-tasks never read them (`paths.case_image_path` rejects test ids).
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
