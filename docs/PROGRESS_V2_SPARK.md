@@ -113,7 +113,15 @@ imagesTr 800 == labelsTr 800; splits_final.json exists; role counts Counter({'v2
 ```
 imagesTs/labelsTs exist on SPARK (v1 test split, normal here); the C-tasks never read them (`paths.case_image_path` rejects test ids).
 
+- [C03] 2026-10-26 — datasets (gapfill, lumen done; decider running) — verification so far:
+```
+gapfill: 20 _done_shard, 640/640 cases, 0 errors, 8474 samples {truncate 1527, taper_neg 1924, gap 1558, shrink 1516, delete_branch 1145, occlusion 804}; 5 % of positives have an empty input mask (D-V2-C03b)
+lumen:   20 _done_shard, 19634 branch files, 0 errors, 4.8 GB
+```
+- [C04/C05 sanity] gap-filler PASS (init 1.6664, Dice 0.9973); lumen PASS (init 1.3663, Dice 1.0000); timing 0.302 s/step (gapfill) and 2.03 s/step (lumen), D-V2-C04b.
+
 ## In progress
+- [C04/C05] GPU chain started 2026-10-26: `~/twinloop-data/v2/tmp/scr/chain_train.sh` (log `chain_train.log` next to it). Containers `twinloop-v2-train-gapfill` (seeds 0,1,2; ~3.4 h each) then `twinloop-v2-train-lumen` (seeds 0,1,2; ~17 h each). Runs in `/data/v2/runs/<model>/seed<k>/` (train_log.csv, ckpt.pt, best.pt, metrics.json). Seeds resume from ckpt.pt: if a container died, rerun the same loop for the model (`./scripts/dkd twinloop-v2-train-<m> bash -c 'for s in 0 1 2; do python -m train.train_<m> --data /data/v2/datasets/<m> --out /data/v2/runs/<m>/seed$s --seed $s; done'`) but only for seeds without metrics.json. Check: `docker logs --tail 20 <name>`, `docker inspect -f '{{.State.ExitCode}}' <name>`.
 - [C03] datasets running (started 2026-10-26 01:33 host time). Chain script `~/twinloop-data/v2/tmp/scr/chain_data.sh` runs gapfill -> lumen -> decider one after another; log `~/twinloop-data/v2/tmp/scr/chain_data.log`. Containers `twinloop-v2-data-gapfill`, then `-lumen`, then `-decider` (`docker logs --tail 20 <name>`; `docker inspect -f '{{.State.ExitCode}}' <name>`). Output `/data/v2/datasets/<name>/` (`_done_shard_NN` x20 each). Shards resume: if the chain died, rerun the same `dkd` command for the dataset that is not finished (case markers `_case_NNNN.done`). Do not edit train/make_*_data.py or train/shards.py while it runs.
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
 WAITING: v1 T09 not on main yet (main HEAD = 4e990d1 T05; training still running in twinloop-train). S12M, S13-S16 are blocked on it. S00-S12 are done; only S17 (optional, skipped unless raw/mmwhs exists) is open.
