@@ -120,7 +120,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S06 — Damage generator
+## [x] S06 — Damage generator
 **Depends on:** S02
 **Files:** `src/twinloop/damage.py`, `scripts/v2_damage_preview.py`, `tests/test_damage.py`
 **Steps:**

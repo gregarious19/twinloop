@@ -48,6 +48,12 @@ unique regression case ids: 20; rerun of make_regression_set.py exits 1 ("regres
 case_ids: [236,124,44,914,8,14,752,742,836,144,688,4,366,744,352,6,34,38,68,82]
 ```
 Notes: branch_recall / false_branch_rate / false_branches take `ref: sitk.Image` (or a sitk mask) because physical points need the grid; with no GT branches recall is 1.0 and false-branch rate 0.0.
+- [S06] 2026-10-25 — damage.py, scripts/v2_damage_preview.py — verification:
+```
+tests/test_damage.py: 8 passed
+v2_damage_preview --n 10: counts per type {'truncate': 11, 'gap': 16, 'shrink': 14, 'delete_branch': 11, 'false_branch': 5, 'occlusion': 3}; skipped damages: 0; ~4-5 s per case
+```
+Spec gaps resolved (D-V2-S06a): gap/shrink draw `len` before `s` (s range depends on it); shrink uses s ~ U(5, L-5-len) like gap; a try that changes 0 voxels is rejected.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
