@@ -220,7 +220,7 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
 
 ---
 
-## [ ] T08 — Real segmentation wrapper, baseline, evaluation scripts
+## [x] T08 — Real segmentation wrapper, baseline, evaluation scripts
 **Depends on:** T05 (benchmark checkpoint exists), T06
 **Files:** `src/twinloop/segmentation.py` (full), `scripts/eval_seg.py`, `scripts/eval_pipeline.py`, `tests/test_segmentation_gpu.py`
 **Steps:**

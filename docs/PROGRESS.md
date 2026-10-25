@@ -3,6 +3,18 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T08 — Segmentation wrapper, baseline, evaluation scripts (2026-10-26)
+Files: `src/twinloop/segmentation.py` (full), `scripts/eval_seg.py`, `scripts/eval_pipeline.py`, `tests/test_segmentation_gpu.py`. Mechanics only, train cases 1-3 and 1-2, 5-epoch benchmark model; **no test-split case was used**. The numbers below are NOT results.
+```
+TWINLOOP_NNUNET_TRAINER=nnUNetTrainer_5epochs ./scripts/dk pytest -q -m "gpu and data" tests/test_segmentation_gpu.py   # 1 passed in 132.26s
+eval_seg.py --method threshold --split train --limit 3   # method=threshold n=3 dice_mean=0.0072 dice_sd=0.0022 clsens_mean=0.5292
+eval_seg.py --method nnunet    --split train --limit 3   # method=nnunet n=3 dice_mean=0.5207 dice_sd=0.1018 clsens_mean=0.9060
+head -3 /data/runs/eval/mechanics_check.csv   # case_id,method,dice,cl_sens,pred_volume_mm3,gt_volume_mm3,infer_s + rows
+eval_pipeline.py --split train --n 2   # gt success=2/2, pred success=2/2, t_segmentation median 104.8 s, both CSV headers per SPEC §8
+ruff check: All checks passed!; ruff format --check: 27 files already formatted; pytest -q: 58 passed, 1 deselected
+```
+Note: `eval_pipeline.py` also prints matched/unmatched tree counts. The `infer_s` for 3 cases includes nnU-Net start-up, so it is not representative; the final run uses 200 cases. These runs ran concurrently with training and slowed it briefly.
+
 ### T05 — nnU-Net dataset, preprocessing, benchmark, training launched (2026-10-24)
 Files: `scripts/convert_to_nnunet.py`, `scripts/train.sh`. Decisions: D40, D41.
 ```
