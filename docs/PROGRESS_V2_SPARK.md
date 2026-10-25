@@ -37,6 +37,10 @@ Note: two_trees_gap removes only the tube voxels (x > 20 mm), so the second tree
 ```
 tests/test_anatomy_geometry.py + test_graph.py: 14 passed; full suite 81 passed; ruff clean
 ```
+- [S07] 2026-10-25 — cpr.py (phys_to_index_zyx, rmf, straighten_points/straighten, center_component, r_eq_mm) — done BEFORE S06 (order swap, see DECISIONS D-V2-S07a) — verification:
+```
+tests/test_cpr.py: 5 passed; ruff clean
+```
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

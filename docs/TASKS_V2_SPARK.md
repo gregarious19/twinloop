@@ -134,7 +134,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S07 — CPR straightening
+## [x] S07 — CPR straightening
 **Depends on:** S02
 **Files:** `src/twinloop/cpr.py`, `tests/test_cpr.py`
 **Steps:**
