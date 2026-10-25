@@ -93,10 +93,11 @@ Decisions: D-V2-S12a/b/c. S09 is still waiting for the sensitivity report (see I
 tests/test_flow.py + tests/test_solver.py: 13 passed (worked example 98.0 / 49.0 mL/min; auto without myocardium -> diameter_law; flag at baseline FFR 0.79, none for lesion-free or r_min 0.8)
 reports/v2_sensitivity.md: 20 rows (5 cases x 4 modes), cases 2, 3, 7, 9, 11
 ```
-Observation: tree_0 min FFR moves by up to ~0.09 between modes within a case (case 11: 0.94 diameter law -> 0.83 myocardial mass -> 0.79 / 0.87 for mass x1.2 / x0.8). Resting MBF 1.0 mL/min/g kept (D-V2-S09a). FFR unvalidated.
+Observation: tree_0 min FFR moves by up to 0.15 between modes within one case (median 0.03; case 11: 0.939 diameter law, 0.828 myocardial mass, 0.785 / 0.872 for mass x1.2 / x0.8). Resting MBF 1.0 mL/min/g kept (D-V2-S09a). FFR unvalidated.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
+WAITING: v1 T09 not on main yet (main HEAD = 4e990d1 T05; training still running in twinloop-train). S12M, S13-S16 are blocked on it. S00-S12 are done; only S17 (optional, skipped unless raw/mmwhs exists) is open.
 Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group membership not active in the session).
 
 ## BLOCKED
@@ -104,6 +105,12 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 
 ## Notes for next session
 <!-- Observations, sanity-check results, things the owner should look at, bug reports for CLUSTER. -->
+### Handoff 2026-10-25
+- Next: S12M once `git log main` shows `T09:`. S17: `${TWINLOOP_DATA}/raw/mmwhs` does not exist -> mark skipped.
+- WAITING ON OWNER: (2) create the private git remote and push branch v2 (SPEC §15). CLUSTER needs S07/S08-era code via that push.
+- Bug reports for CLUSTER: none. Test-suite: 124 passed. Open SPEC ISSUES: D-V2-S01c (aorta_connected), D-V2-S08a (mask_ahead_frac).
+- Docker in this shell needs `sg docker -c "./scripts/dk ..."`.
+
 ### S08 design-check observations (not tuned)
 - `delete_branch` (action `add`) matched 0/11: the decider's `add` class would get no synthetic positives from the current data. Examples (cases 2, 3, 7): the nearest probe region to the deleted branch's origin is 24.9, 22.3 and 48.5 mm away; only 10 probe regions exist in those 3 cases (2–5 per case). Probes are proposed every 5 mm on branches with r >= 1 mm, require a ray with mean HU >= 250 entirely outside the mask and are suppressed near junctions and each other, so the point at a deleted branch's origin is rarely probed. Owner/planner should decide whether to relax probe rules (SPEC change); I did not.
 - `gap` 12/16 and `false_branch` 3/5 unmatched cases not examined further (>= 50 %: no action required).
