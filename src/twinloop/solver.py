@@ -92,10 +92,15 @@ def _bfs_order(tree: VesselTree) -> list[str]:
     return order
 
 
-def solve_tree(tree: VesselTree, lesions: dict[str, list[Lesion]], p: SolverParams) -> TreeSolution:
+def solve_tree(
+    tree: VesselTree,
+    lesions: dict[str, list[Lesion]],
+    p: SolverParams,
+    q_rest_override_m3s: float | None = None,
+) -> TreeSolution:
     pa = p.aortic_pressure_mmhg * MMHG_TO_PA
     pv = p.venous_pressure_mmhg * MMHG_TO_PA
-    q_rest = resting_flow_m3s(tree, p)
+    q_rest = resting_flow_m3s(tree, p) if q_rest_override_m3s is None else q_rest_override_m3s
     weights = outlet_weights(tree, p)
     resist = {
         oid: p.hyperemia_resistance_factor * (pa - pv) / (w * q_rest) for oid, w in weights.items()

@@ -64,8 +64,13 @@ def test_no_mask_and_no_model_fails_with_message(tmp_path, monkeypatch):
         run_pipeline(img, None, PipelineParams(), tmp_path, "c", "t.nii.gz")
 
 
-def test_cli_ok_and_failed(tmp_path, capsys):
+def test_cli_ok_and_failed(tmp_path, capsys, monkeypatch):
     from twinloop.io import save_nifti
+
+    def no_anatomy(*args, **kwargs):
+        raise RuntimeError("disabled in tests")
+
+    monkeypatch.setattr("twinloop.anatomy.segment_anatomy", no_anatomy)  # v2 CLI default is on
 
     img, mask = make_phantom("stenosis")
     save_nifti(img, tmp_path / "img.nii.gz")

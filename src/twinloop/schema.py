@@ -59,6 +59,19 @@ class InputInfo(BaseModel):
     has_mask: bool
 
 
+class V2Out(BaseModel):
+    """Optional v2 block of result.json (SPEC_V2 §12)."""
+
+    anatomy_source: dict[str, str]
+    qc: dict[str, bool]
+    myocardium_ml: float | None
+    flow_mode: str
+    branch_labels: dict[str, str]
+    repair_actions: list[dict]
+    review_flags: list[dict]
+    timings_s: dict[str, float]
+
+
 class CaseResult(BaseModel):
     schema_version: str = "1.0"
     case_id: str
@@ -71,3 +84,4 @@ class CaseResult(BaseModel):
     timings_s: dict[str, float]  # keys: load, segmentation, centerline, solver, total
     warnings: list[str]
     disclaimer: str
+    v2: V2Out | None = None

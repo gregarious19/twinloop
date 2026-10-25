@@ -79,6 +79,15 @@ Decisions: D-V2-S10a.
 ```
 tests/test_lumen.py: 4 passed (stenosis min r 0.75±0.15, median 1.5±0.15 from wrong 3.0 mm v1 radii; all -10 model keeps radii and warns; branch < 10 mm unchanged; window starts)
 ```
+- [S12] 2026-10-25 — V2Options + v2 argument in run_pipeline, CLI flags, V2Out / CaseResult.v2 — verification:
+```
+./scripts/dk pytest -q -> 124 passed (tests/test_pipeline_v2.py: 5 new; test_cli_ok_and_failed now monkeypatches segment_anatomy)
+real case (id 2, GT mask, highres anatomy):
+OK case_id=s12_case2 trees=2 lesions=1 min_ffr=0.901 total_s=163.2
+v2: flow_mode=myocardial_mass, myocardium_ml=89.4, qc {aorta_present True, aorta_connected False, myo_present True, ostia_ok False},
+    branch_labels RCA/LM/LAD/LCX/other, repair_actions [], review_flags = abrupt_end per ending (no ffr_uncertain), timings segmentation 143.1 s (anatomy) centerline 2.8 s
+```
+Decisions: D-V2-S12a/b/c. S09 is still waiting for the sensitivity report (see In progress).
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)

@@ -208,7 +208,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S12 — Pipeline integration
+## [x] S12 — Pipeline integration
 **Depends on:** S09, S10, S11
 **Files:** `src/twinloop/pipeline.py`, `src/twinloop/schema.py`, `tests/test_pipeline_v2.py`
 **Steps:**

@@ -3,6 +3,7 @@
 import argparse
 import dataclasses
 import os
+import shutil
 import sys
 import time
 import traceback
@@ -12,7 +13,8 @@ from pathlib import Path
 import numpy as np
 import SimpleITK as sitk
 
-from twinloop import segmentation
+from twinloop import anatomy, segmentation
+from twinloop.anatomy import Anatomy, coverage_check, find_ostia, label_branches
 from twinloop.casefiles import (
     initial_status,
     new_case_id,
@@ -22,8 +24,14 @@ from twinloop.casefiles import (
 )
 from twinloop.centerline import VesselTree, extract_trees
 from twinloop.config import PipelineParams
+from twinloop.config_v2 import FlowParams, V2Params
+from twinloop.flow import MYO_UNAVAILABLE_WARNING, ffr_uncertainty_flags, tree_rest_flows
+from twinloop.graph import CoronaryGraph, endings_for_tree
 from twinloop.io import load_image, load_mask, save_nifti
 from twinloop.lesions import Lesion, detect_lesions
+from twinloop.lumen import refine_radii
+from twinloop.modelio import load_model
+from twinloop.repair import RulesDecider, run_repair
 from twinloop.schema import (
     DISCLAIMER,
     BranchOut,
@@ -32,11 +40,34 @@ from twinloop.schema import (
     LesionOut,
     Summary,
     TreeOut,
+    V2Out,
 )
 from twinloop.solver import TreeSolution, solve_tree
 
 SIGNIFICANT_FFR = 0.80
+V2_DEFAULT_FLOW_MODES = ("auto", "diameter_law", "myocardial_mass")
 M3S_TO_ML_MIN = 1e6 * 60.0
+
+
+@dataclasses.dataclass
+class V2Options:
+    anatomy: bool = True
+    repair: bool = False
+    lumen: bool = False
+    flow_mode: str = "auto"
+    decider: str = "learned"  # "learned" | "rules" (rules: RulesDecider, used by the evaluation)
+
+
+def _empty_anatomy(message: str) -> Anatomy:
+    qc = {"aorta_present": False, "aorta_connected": False, "myo_present": False}
+    return Anatomy(None, None, None, dict.fromkeys(("aorta", "myocardium", "lv_cavity"), "missing"),
+                   {**qc, "ostia_ok": False}, [message])  # fmt: skip
+
+
+def _device() -> str:
+    import torch
+
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def _round_list(a: np.ndarray, digits: int):
@@ -127,6 +158,7 @@ def run_pipeline(
     input_filename: str,
     load_s: float = 0.0,
     on_step: Callable[[str], None] | None = None,
+    v2: V2Options | None = None,
 ) -> CaseResult:
     step = on_step or (lambda name: None)
     case_dir = Path(case_dir)
@@ -135,28 +167,105 @@ def run_pipeline(
     has_mask = mask is not None
     t_start = time.perf_counter()
 
+    P2 = V2Params()
+    device = _device() if v2 is not None and (v2.repair or v2.lumen) else "cpu"
+    models: dict = {}
+    lumen_model = None
+    if v2 is not None and v2.repair:  # fail early if a model is missing
+        decider = RulesDecider() if v2.decider == "rules" else load_model("decider", device)
+        models = {"decider": decider, "gapfill": load_model("gapfill", device)}
+    if v2 is not None and v2.lumen:
+        lumen_model = load_model("lumen", device)
+
     seg_s = 0.0
-    if mask is None:
+    warnings: list[str] = []
+    anat: Anatomy | None = None
+    anatomy_failed = False
+    anatomy_s = repair_s = lumen_s = 0.0
+    if mask is None or (v2 is not None and v2.anatomy):
         step("segmenting")
+    if mask is None:
         t = time.perf_counter()
         mask = segmentation.segment_nnunet(image, case_dir / "nnunet")
         seg_s = time.perf_counter() - t
+    if v2 is not None and v2.anatomy:
+        t = time.perf_counter()
+        workdir = case_dir / "totalseg"
+        try:
+            anat = anatomy.segment_anatomy(image, workdir, P2.anatomy)
+        except Exception as exc:  # anatomy never fails a case
+            anat = _empty_anatomy(str(exc))
+            anatomy_failed = True
+            warnings.append(f"Anatomy unavailable: {exc}")
+        shutil.rmtree(workdir, ignore_errors=True)
+        for name, m in (("aorta", anat.aorta), ("myocardium", anat.myocardium)):
+            if m is not None:
+                save_nifti(m, case_dir / f"{name}.nii.gz")
+        anatomy_s = time.perf_counter() - t
+        seg_s += anatomy_s
 
     step("extracting")
     t = time.perf_counter()
+    repair_actions: list = []
+    review_flags: list[dict] = []
+    if v2 is not None and v2.repair:
+        t_r = time.perf_counter()
+        save_nifti(mask, case_dir / "mask_firstpass.nii.gz")
+        mask, repair_actions, review_flags = run_repair(
+            image, mask, anat if v2.anatomy else None, models, P2, device
+        )
+        repair_s = time.perf_counter() - t_r
     trees = extract_trees(mask, params.centerline)
+    if lumen_model is not None:
+        t_l = time.perf_counter()
+        warnings += refine_radii(trees, image, lumen_model, P2.cpr, device)
+        lumen_s = time.perf_counter() - t_l
     lesion_maps = [_lesions_for_tree(tree, params) for tree in trees]
     centerline_s = time.perf_counter() - t
 
     step("solving")
     t = time.perf_counter()
     solver_params = params.solver
+    q_rest, flow_mode_used = None, "diameter_law"
+    if v2 is not None:
+        fp = FlowParams(flow_mode=v2.flow_mode)
+        q_rest, flow_mode_used = tree_rest_flows(trees, anat, solver_params, fp)
+        if v2.flow_mode == "auto" and flow_mode_used == "diameter_law" and not anatomy_failed:
+            if v2.anatomy:
+                warnings.append(MYO_UNAVAILABLE_WARNING)
     sols = [
-        solve_tree(tree, lm, solver_params) for tree, lm in zip(trees, lesion_maps, strict=True)
+        solve_tree(
+            tree,
+            lm,
+            solver_params,
+            **({} if q_rest is None else {"q_rest_override_m3s": q_rest[tree.tree_id]}),
+        )
+        for tree, lm in zip(trees, lesion_maps, strict=True)
     ]
     solver_s = time.perf_counter() - t
 
-    warnings = [w for tree in trees for w in tree.warnings]
+    branch_labels: dict[str, str] = {}
+    if v2 is not None:
+        merged = {b: ls for lm in lesion_maps for b, ls in lm.items()}
+        review_flags += ffr_uncertainty_flags(
+            trees, merged, solver_params, q_rest, P2.flow.ffr_uncertainty_radius_factor
+        )
+        if v2.anatomy and anat is not None:
+            g = CoronaryGraph(
+                trees=trees,
+                fragments=[],
+                endings=[e for t_ in trees for e in endings_for_tree(t_, P2.graph)],
+                labels={b: "other" for t_ in trees for b in t_.branches},
+                tree_side={t_.tree_id: "unknown" for t_ in trees},
+                warnings=[],
+            )
+            find_ostia(g, anat, P2.anatomy)
+            label_branches(g, anat, P2.anatomy)
+            branch_labels = dict(g.labels)
+            if not v2.repair:  # run_repair already appended the coverage flags
+                review_flags += coverage_check(g, P2.anatomy)
+
+    warnings += [w for tree in trees for w in tree.warnings]
     warnings += [f"Solver did not converge for {s.tree_id}" for s in sols if not s.converged]
 
     lesions_out: list[LesionOut] = []
@@ -191,8 +300,29 @@ def run_pipeline(
         },
         warnings=warnings,
         disclaimer=DISCLAIMER,
+        v2=None
+        if v2 is None
+        else V2Out(
+            anatomy_source=anat.source if anat is not None else {},
+            qc=anat.qc if anat is not None else {},
+            myocardium_ml=None
+            if anat is None or anat.myo_volume_ml is None
+            else round(anat.myo_volume_ml, 1),
+            flow_mode=flow_mode_used,
+            branch_labels=branch_labels,
+            repair_actions=[dataclasses.asdict(a) for a in repair_actions],
+            review_flags=review_flags,
+            timings_s={
+                "anatomy": round(anatomy_s, 1),
+                "repair": round(repair_s, 1),
+                "lumen": round(lumen_s, 1),
+            },
+        ),
     )
-    write_json_atomic(case_dir / "result.json", result.model_dump())
+    dump = result.model_dump()
+    if result.v2 is None:
+        dump.pop("v2")  # v1 result.json stays byte-for-byte compatible
+    write_json_atomic(case_dir / "result.json", dump)
     return result
 
 
@@ -203,6 +333,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--aortic-pressure", type=float, default=90.0)
     ap.add_argument("--case-dir", type=Path)
     ap.add_argument("--case-id")
+    ap.add_argument("--no-anatomy", action="store_true")
+    ap.add_argument("--repair", action="store_true")
+    ap.add_argument("--lumen", action="store_true")
+    ap.add_argument("--flow-mode", choices=V2_DEFAULT_FLOW_MODES, default="auto")
     args = ap.parse_args(argv)
 
     case_id = args.case_id or new_case_id()
@@ -234,6 +368,12 @@ def main(argv: list[str] | None = None) -> int:
             args.image.name,
             load_s=load_s,
             on_step=lambda name: update_status(case_dir, status=name),
+            v2=V2Options(
+                anatomy=not args.no_anatomy,
+                repair=args.repair,
+                lumen=args.lumen,
+                flow_mode=args.flow_mode,
+            ),
         )
     except Exception as exc:
         with open(case_dir / "log.txt", "a") as log:
