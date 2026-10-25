@@ -41,6 +41,18 @@ def _point_at(b: Branch, s: float) -> np.ndarray:
     return np.array([np.interp(s, b.s_mm, b.points_mm[:, k]) for k in range(3)])
 
 
+def end_direction(b: Branch, window_mm: float) -> np.ndarray:
+    """Unit vector pointing distally at the end of a branch."""
+    length = branch_length_mm(b)
+    p_last = b.points_mm[-1]
+    if length < window_mm:
+        d = p_last - b.points_mm[0]
+    else:
+        d = p_last - _point_at(b, length - window_mm)
+    n = float(np.linalg.norm(d))
+    return d / n if n > 0 else np.zeros(3)
+
+
 def _make_ending(tree_id: str, b: Branch, gp: GraphParams) -> Ending:
     length = branch_length_mm(b)
     s, r = b.s_mm, b.radius_mm
@@ -51,24 +63,21 @@ def _make_ending(tree_id: str, b: Branch, gp: GraphParams) -> Ending:
     else:
         r_ref = float(np.median(r[ref]))
     ratio = r_end / r_ref if r_ref > 0 else 0.0
-    p_last = b.points_mm[-1]
-    if length < gp.direction_window_mm:
-        d = p_last - b.points_mm[0]
-    else:
-        d = p_last - _point_at(b, length - gp.direction_window_mm)
-    n = float(np.linalg.norm(d))
-    d = d / n if n > 0 else np.zeros(3)
     abrupt = r_end >= gp.abrupt_min_radius_mm and ratio >= gp.abrupt_taper_ratio
     return Ending(
         tree_id=tree_id,
         branch_id=b.branch_id,
-        point_mm=np.asarray(p_last, dtype=float),
-        direction=d,
+        point_mm=np.asarray(b.points_mm[-1], dtype=float),
+        direction=end_direction(b, gp.direction_window_mm),
         r_end_mm=r_end,
         r_ref_mm=r_ref,
         taper_ratio=float(ratio),
         kind="abrupt" if abrupt else "taper",
     )
+
+
+def endings_for_tree(tree: VesselTree, gp: GraphParams) -> list[Ending]:
+    return [_make_ending(tree.tree_id, b, gp) for b in tree.branches.values() if not b.children]
 
 
 def build_graph(mask: sitk.Image, cp: CenterlineParams, gp: GraphParams) -> CoronaryGraph:

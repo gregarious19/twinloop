@@ -76,7 +76,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S03 — Ostia, LV axis, branch labels, coverage check
+## [x] S03 — Ostia, LV axis, branch labels, coverage check
 **Depends on:** S01, S02
 **Files:** `src/twinloop/anatomy.py` (part 2), `tests/test_anatomy_geometry.py`
 **Steps:**

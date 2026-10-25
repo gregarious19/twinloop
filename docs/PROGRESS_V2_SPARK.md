@@ -33,6 +33,10 @@ Surprises: class names differ from spec (D-V2-S01a); aorta_connected False on a 
 tests/test_graph.py: 5 passed; full suite: 72 passed; ruff clean
 ```
 Note: two_trees_gap removes only the tube voxels (x > 20 mm), so the second tree's cylinder at x=15 stays intact, per spec ("the tube's voxels").
+- [S03] 2026-10-25 — find_ostia, lv_axis, label_branches, coverage_check (anatomy.py part 2); graph.py gained public end_direction/endings_for_tree — verification:
+```
+tests/test_anatomy_geometry.py + test_graph.py: 14 passed; full suite 81 passed; ruff clean
+```
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
