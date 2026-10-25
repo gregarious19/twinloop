@@ -92,7 +92,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S04 — Vertical slice: `v2_inspect` on real cases
+## [x] S04 — Vertical slice: `v2_inspect` on real cases
 **Depends on:** S03
 **Files:** `scripts/v2_inspect.py`
 **Steps:**

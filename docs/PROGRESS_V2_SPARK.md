@@ -54,6 +54,14 @@ tests/test_damage.py: 8 passed
 v2_damage_preview --n 10: counts per type {'truncate': 11, 'gap': 16, 'shrink': 14, 'delete_branch': 11, 'false_branch': 5, 'occlusion': 3}; skipped damages: 0; ~4-5 s per case
 ```
 Spec gaps resolved (D-V2-S06a): gap/shrink draw `len` before `s` (s range depends on it); shrink uses s ~ U(5, L-5-len) like gap; a try that changes 0 voxels is rejected.
+- [S04] 2026-10-25 — scripts/v2_inspect.py; run on cases 2, 3, 7 (GT masks, highres anatomy) — verification:
+```
+OK case=2 trees=2 fragments=0 labels=['LAD', 'LCX', 'LM', 'RCA', 'other'] flags=10 t=167
+OK case=3 trees=2 fragments=0 labels=['LAD', 'LCX', 'LM', 'RCA', 'other'] flags=11 t=172
+OK case=7 trees=2 fragments=0 labels=['LAD', 'LCX', 'LM', 'RCA', 'other'] flags=14 t=138
+ls $TWINLOOP_DATA/v2/inspect/*.json | wc -l -> 3
+```
+Sanity (no parameters tuned, no bugs found): see Notes for next session.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
@@ -64,3 +72,10 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 
 ## Notes for next session
 <!-- Observations, sanity-check results, things the owner should look at, bug reports for CLUSTER. -->
+### S04 sanity observations (cases 2, 3, 7; GT masks)
+- All 3: 2 trees, 0 fragments, labels LM/LAD/LCX/RCA all present, no graph warnings. Myocardium 84–102 mL, aorta 86–114 mL.
+- `aorta_connected` False in 3/3 (known SPEC ISSUE D-V2-S01c: ascending/descending pieces).
+- `ostia_ok` True only in case 3. Case 2: left ostium 2.8 mm from the TotalSegmentator aorta, RCA root 19.9 mm away; no RCA point is closer (checked all branch starts/ends), so the GT RCA annotation does not reach the aortic root / TS aorta ends short; not an axis or unit bug. Cases 2 and 7 therefore get `ostia_ok` False.
+- Every GT ending is flagged `abrupt_end` (10/11/14 flags, no other kinds): ImageCAS GT vessels stop at r_end 1.0–1.5 mm, which the spec's abrupt rule (r_end >= 0.8 and ratio >= 0.75) calls abrupt. The flag is therefore uninformative on GT masks; expect many on predictions too. Not tuned.
+- Time per case ~130–170 s, almost all heartchambers_highres.
+

@@ -18,6 +18,13 @@ def phys_to_index_zyx(points_mm: np.ndarray, img: sitk.Image) -> np.ndarray:
     return idx_xyz[:, ::-1]
 
 
+def index_zyx_to_phys(idx_zyx: np.ndarray, img: sitk.Image) -> np.ndarray:
+    """Physical (x, y, z) mm of voxel indices given as (z, y, x), shape (N, 3)."""
+    d = np.array(img.GetDirection()).reshape(3, 3)
+    xyz = np.asarray(idx_zyx, float)[:, ::-1] * np.array(img.GetSpacing())
+    return np.array(img.GetOrigin()) + xyz @ d.T
+
+
 def rmf(points: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Rotation-minimising frame by double reflection (Wang et al. 2008): T, U, V (N, 3)."""
     x = np.asarray(points, dtype=float)

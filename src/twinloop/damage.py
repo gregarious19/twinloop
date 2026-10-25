@@ -8,7 +8,7 @@ from scipy.spatial import cKDTree
 
 from twinloop.centerline import Branch, VesselTree
 from twinloop.config_v2 import DamageParams
-from twinloop.cpr import rmf
+from twinloop.cpr import index_zyx_to_phys, rmf
 from twinloop.graph import CoronaryGraph
 
 TYPES = ("gap", "truncate", "delete_branch", "shrink", "false_branch", "occlusion")
@@ -28,12 +28,6 @@ class DamageRecord:
     direction: list[float]  # unit vector
     length_mm: float
     voxels_changed: int
-
-
-def _to_phys(idx_zyx: np.ndarray, img: sitk.Image) -> np.ndarray:
-    d = np.array(img.GetDirection()).reshape(3, 3)
-    xyz = idx_zyx[:, ::-1] * np.array(img.GetSpacing())
-    return np.array(img.GetOrigin()) + xyz @ d.T
 
 
 def _point_at(b: Branch, s: float) -> np.ndarray:
@@ -70,7 +64,7 @@ def _voxels_near_segment(img: sitk.Image, a: np.ndarray, b: np.ndarray, radius: 
     grid = np.stack(
         np.meshgrid(*[np.arange(lo[k], hi[k] + 1) for k in (2, 1, 0)], indexing="ij"), axis=-1
     ).reshape(-1, 3)  # (z, y, x)
-    p = _to_phys(grid, img)
+    p = index_zyx_to_phys(grid, img)
     ab = b - a
     t = np.clip(((p - a) @ ab) / float(ab @ ab), 0.0, 1.0)
     dist = np.linalg.norm(p - (a + t[:, None] * ab), axis=1)
@@ -98,7 +92,7 @@ def damage_case(
     r_all = np.concatenate([b.radius_mm for _, b in branches])
 
     vox = np.argwhere(mask)  # (N, 3) z, y, x of the original GT voxels
-    dist, nn = cKDTree(pts).query(_to_phys(vox, gt), workers=-1)
+    dist, nn = cKDTree(pts).query(index_zyx_to_phys(vox, gt), workers=-1)
     v_owner, v_s = owner[nn], s_all[nn]
     v_near = dist <= 1.5 * r_all[nn] + 0.5
 
