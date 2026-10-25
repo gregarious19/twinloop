@@ -161,7 +161,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S09 — Myocardial-mass flow, FFR uncertainty, sensitivity check
+## [x] S09 — Myocardial-mass flow, FFR uncertainty, sensitivity check
 **Depends on:** S03
 **Files:** `src/twinloop/flow.py`, `src/twinloop/solver.py` (add `q_rest_override_m3s` only), `scripts/v2_sensitivity.py`, `reports/v2_sensitivity.md`, `tests/test_flow.py`
 **Steps:**

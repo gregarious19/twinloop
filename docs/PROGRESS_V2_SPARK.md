@@ -88,6 +88,12 @@ v2: flow_mode=myocardial_mass, myocardium_ml=89.4, qc {aorta_present True, aorta
     branch_labels RCA/LM/LAD/LCX/other, repair_actions [], review_flags = abrupt_end per ending (no ffr_uncertain), timings segmentation 143.1 s (anatomy) centerline 2.8 s
 ```
 Decisions: D-V2-S12a/b/c. S09 is still waiting for the sensitivity report (see In progress).
+- [S09] 2026-10-25 — flow.py (tree_rest_flows, ffr_uncertainty_flags, min_ffr), solver `q_rest_override_m3s`, scripts/v2_sensitivity.py, reports/v2_sensitivity.md — verification:
+```
+tests/test_flow.py + tests/test_solver.py: 13 passed (worked example 98.0 / 49.0 mL/min; auto without myocardium -> diameter_law; flag at baseline FFR 0.79, none for lesion-free or r_min 0.8)
+reports/v2_sensitivity.md: 20 rows (5 cases x 4 modes), cases 2, 3, 7, 9, 11
+```
+Observation: tree_0 min FFR moves by up to ~0.09 between modes within a case (case 11: 0.94 diameter law -> 0.83 myocardial mass -> 0.79 / 0.87 for mass x1.2 / x0.8). Resting MBF 1.0 mL/min/g kept (D-V2-S09a). FFR unvalidated.
 
 ## In progress
 WAITING ON OWNER: (1) [licence now works] (2) create the private git remote and push (SPEC §15)
