@@ -242,7 +242,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S13 — First-pass evaluation (Track B)
+## [x] S13 — First-pass evaluation (Track B)
 **Depends on:** S05, S12M (training finished, `TWINLOOP_NNUNET_TRAINER` set)
 **Files:** `scripts/eval_v2.py`, `reports/v2_eval_firstpass.csv`
 **Steps:**

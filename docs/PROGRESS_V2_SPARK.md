@@ -170,3 +170,13 @@ Merged `main` (9c52737, "T09, T10": commit subject is not `T09:` but contains T0
 ### In progress (2026-10-26 12:42 IST)
 - S13: `twinloop-v2-predict-firstpass` (detached, started 12:42 IST) writes /data/v2/firstpass/ (160 cases, regression set first). Then run: `./scripts/dk python scripts/eval_v2.py --cases regression --variants gt_v1,pred_v1 --out reports/v2_eval_firstpass.csv`. `scripts/eval_v2.py` smoke-tested on gt_v1 (case 236 ok).
 - C04 gap-filler seed 1 running (`twinloop-v2-train-gapfill`, chain continues to seed 2 then lumen).
+
+### S13 — First-pass evaluation (2026-10-26)
+`scripts/eval_v2.py --cases regression --variants gt_v1,pred_v1 --out reports/v2_eval_firstpass.csv` → 40 rows, 40 ok, 0 failed. First-pass masks from `scripts/predict_firstpass.py` (D-V2-S13a).
+```
+variant  dice   cl_dice  branch_recall  false_branch_rate  widened_rate  mean_abs_rmin_err_mm
+gt_v1    1.000  1.000    1.000          0.000              0.000         0.003
+pred_v1  0.787  0.845    0.900          0.169              0.900         0.556
+```
+Lowest branch_recall (pred_v1): case 366 (0.762), case 688 (0.765), case 236 (0.773).
+Note: pred_v1 widened_rate 0.90 is very high (nearly every GT lesion looks less stenosed in the first-pass tree). Reported as measured; not tuned on.
