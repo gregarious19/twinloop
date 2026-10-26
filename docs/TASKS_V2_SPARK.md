@@ -224,7 +224,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S12M — Merge v1 `main` into `v2`
+## [x] S12M — Merge v1 `main` into `v2`
 **Depends on:** S12; v1 T09 finished on `main`
 **Steps:**
 1. Check v1 progress without leaving the worktree: `git show main:docs/PROGRESS.md | grep -nE "T0[6-9]|T1[0-2]"` and `git log --oneline main | head -20`. Proceed only if a commit `T09:` exists on `main` (training finished, trainer default set). Otherwise write `WAITING: v1 T09 not on main yet` under In progress and end the session (nothing else on SPARK is unblocked except S17).

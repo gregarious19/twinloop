@@ -163,3 +163,6 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 
 
 - 2026-10-26 10:03 IST: gap-filler training (twinloop-v2-train-gapfill) unpaused by user request; resumed from step ~17100.
+
+### S12M — Merge v1 main into v2 (2026-10-26)
+Merged `main` (9c52737, "T09, T10": commit subject is not `T09:` but contains T09) with no conflicts. `app/jobs.py` now passes `V2Options()`; `tests/test_api.py` has an autouse fixture disabling `segment_anatomy`. `./scripts/dk pytest -q` → 130 passed, 2 deselected; ruff check + format clean. Server check skipped: v1 `twinloop-server` is running. `scripts/dk` default trainer is still `nnUNetTrainer` (v1 default, = the full-training trainer whose checkpoint_final exists).

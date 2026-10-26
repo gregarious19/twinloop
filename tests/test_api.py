@@ -11,6 +11,14 @@ from twinloop.phantom import make_phantom, write_dicom_series
 from twinloop.schema import CaseResult
 
 
+@pytest.fixture(autouse=True)
+def _no_anatomy(monkeypatch):
+    def _raise(*args, **kwargs):
+        raise RuntimeError("disabled in tests")
+
+    monkeypatch.setattr("twinloop.anatomy.segment_anatomy", _raise)
+
+
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("TWINLOOP_DATA", str(tmp_path / "data"))

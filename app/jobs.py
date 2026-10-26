@@ -10,7 +10,7 @@ from pathlib import Path
 from twinloop.casefiles import read_status, update_status
 from twinloop.config import PipelineParams
 from twinloop.io import load_image, load_mask
-from twinloop.pipeline import run_pipeline
+from twinloop.pipeline import V2Options, run_pipeline
 
 JOB_TIMEOUT_S = 15 * 60
 FINAL_STATES = ("done", "failed")
@@ -95,6 +95,7 @@ class JobManager:
                 status["filename"],
                 load_s=load_s,
                 on_step=on_step,
+                v2=V2Options(),
             )
             check_time()
             update_status(case_dir, status="done", timings_s=result.timings_s)
