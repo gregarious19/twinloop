@@ -194,3 +194,9 @@ Seeds 0/1/2 best val new-voxel Dice 0.7856 / 0.7853 / 0.7893 (all 40000 steps, n
 
 ### C05 lumen crash fixed (2026-10-26 ~15:45 IST)
 First lumen run died at the step-2000 validation: `TypeError: Got unsupported ScalarType BFloat16` in `lumen._predict_logits` (autocast output .numpy()). Fix: `.float()` before `.cpu().numpy()` (src/twinloop/lumen.py), regression test `test_predict_logits_accepts_bfloat16_output`; also removed an unused import in scripts/predict_firstpass.py. 131 passed, ruff clean. Relaunched `twinloop-v2-train-lumen` (seeds 0-2, skips seeds with metrics.json; the old chain_train.sh is finished, nothing else waits on it). Everything runs on SPARK for now (owner decision), so C07 etc. run here too. Check validation passed: `docker logs --tail 5 twinloop-v2-train-lumen` after step 2000.
+
+### C05 / C07 / C08 done on SPARK (2026-10-26)
+- C05: lumen seeds 0/1/2 best val r_eq err 0.1251 / 0.1271 / 0.1249 mm (30000 steps each, none killed; best step 28000/30000/30000).
+- C07: `train/export_models.py` -> `~/twinloop-data/models/v2/{gapfill,lumen,decider}`; deployed gapfill seed 2 (0.7893), lumen seed 2 (0.1249 mm), decider seed 1 (macro-F1 0.6381). Loading checks pass. `reports/v2_training.md` written.
+- C08: `train/finetune_decider.py`; 5-fold grouped CV on real rows macro-F1 0.435 ± 0.055 (synthetic-only on all real rows 0.310). `decider_synth_only/` kept. See report section.
+- Everything ran on SPARK by owner decision; no rsync needed.

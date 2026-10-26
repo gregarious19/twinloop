@@ -147,7 +147,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C05 — Train the lumen model
+## [x] C05 — Train the lumen model
 **Depends on:** C03
 **Files:** `train/train_lumen.py`, `cluster/jobs/train_lumen.sh`
 **Steps:** same structure as C04 with SPEC §14 LumenNet recipe:
@@ -171,7 +171,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C07 — Export models and the training report
+## [x] C07 — Export models and the training report
 **Depends on:** C04, C05, C06 (export whichever finished; list missing ones as BLOCKED)
 **Files:** `train/export_models.py`, `reports/v2_training.md`
 **Steps:**
@@ -185,7 +185,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C08 — Fine-tune the decider on real failures
+## [x] C08 — Fine-tune the decider on real failures
 **Depends on:** C06; SPARK S14 dataset synced to `$TWINLOOP_DATA/v2/datasets/decider_real/decider_real.parquet`
 **Files:** `train/finetune_decider.py`
 **Steps:**
