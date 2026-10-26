@@ -218,4 +218,4 @@ reports/v2_eval.csv: 100 rows, all ok. H1 FALSIFIED (branch recall −0.010), H2
 ### S18 — Stenosis widening and lumen diagnostics (2026-10-26)
 Verify output: `20 23281 {'gt': 20, 'gt_shift0.5': 20, 'gt_shift1.0': 20, 'pred': 20, 'pred_nolumen': 20}`
 Findings (reports/v2_diagnostics.md): healthy-point radius bias of pred_v1 +0.029 mm vs +0.415 mm at GT lesions (mask not wider everywhere, only at narrowings; lesion points also miss more: 18 % no pred point within 2 mm). Lumen on GT centerlines: r_min err 0.797 mm (not 0.1-0.2), worse than no lumen (0.556); offset 0.5/1.0 mm -> 0.861/0.958. Centerline mismatch is not the main cause; error is a positive radius bias (possibly radius-definition mismatch r_eq vs EDT, untested). Nothing retrained or changed.
-WAITING ON OWNER: git push origin v2
+(pushed to origin/v2 on owner request)
