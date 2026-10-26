@@ -166,3 +166,7 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 
 ### S12M — Merge v1 main into v2 (2026-10-26)
 Merged `main` (9c52737, "T09, T10": commit subject is not `T09:` but contains T09) with no conflicts. `app/jobs.py` now passes `V2Options()`; `tests/test_api.py` has an autouse fixture disabling `segment_anatomy`. `./scripts/dk pytest -q` → 130 passed, 2 deselected; ruff check + format clean. Server check skipped: v1 `twinloop-server` is running. `scripts/dk` default trainer is still `nnUNetTrainer` (v1 default, = the full-training trainer whose checkpoint_final exists).
+
+### In progress (2026-10-26 12:42 IST)
+- S13: `twinloop-v2-predict-firstpass` (detached, started 12:42 IST) writes /data/v2/firstpass/ (160 cases, regression set first). Then run: `./scripts/dk python scripts/eval_v2.py --cases regression --variants gt_v1,pred_v1 --out reports/v2_eval_firstpass.csv`. `scripts/eval_v2.py` smoke-tested on gt_v1 (case 236 ok).
+- C04 gap-filler seed 1 running (`twinloop-v2-train-gapfill`, chain continues to seed 2 then lumen).
