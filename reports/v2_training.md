@@ -58,3 +58,19 @@ Reference (not a CV, not used for selection): the synthetic-only decider (seed 1
 0.310 (accuracy 0.693) on all 2 675 real rows. The synthetic validation macro-F1 (0.638) is not
 comparable to the real-row scores: the decider is much weaker on real failures than on synthetic
 damage. The fine-tuned model is deployed as `decider`; the previous one is `decider_synth_only`.
+
+## Lumen v3 (S23)
+
+Validation = `jit` branch files of the v2_train validation cases (case_id % 10 == 3); mean |r(pred) − r(GT)| in mm over slices with a GT lumen, per severity bin of the slice (healthy ds < 0.25, mild [0.25, 0.5), moderate+ ≥ 0.5). Model selection = moderate+ r_ins. Kill criterion (moderate+ r_ins > 0.5 mm at 25 % of steps) never triggered.
+
+| model | seed | best step | r_ins healthy | r_ins mild | r_ins mod+ | r_eq healthy | r_eq mild | r_eq mod+ | hours | deployed as lumen_v3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| old `lumen` (reference) | 2 | 30000 | 0.177 | 0.344 | 0.453 | 0.120 | 0.286 | 0.478 | 1.28 | n/a |
+| lumen v3 | 0 | 26000 | 0.184 | 0.330 | 0.415 | 0.129 | 0.290 | 0.449 | 0.57 | no |
+| lumen v3 | 1 | 28000 | 0.183 | 0.334 | 0.425 | 0.127 | 0.286 | 0.446 | 0.58 | no |
+| lumen v3 | 2 | 28000 | 0.181 | 0.328 | 0.408 | 0.122 | 0.286 | 0.445 | 0.57 | yes |
+
+Validation slices (healthy / mild / mod+): 96262 / 1420 / 368; the moderate+ figure rests on few slices from few lesions.
+
+Frozen inference settings (validation cases only, see `reports/v3_lumen_freeze_grid.csv`): radius_out=ins, fallback=interp, sigma=0.0. Moderate+ |error| at GT lesion minima on GT centerlines shifted 0.5 mm: 1.086 mm (n = 77 lesions, 85 cases), always an over-estimate of the GT-graph radius. This is far above the slice-level error (~0.4 mm); the ruler differs (GT-graph radius is the 3-D EDT value).
+

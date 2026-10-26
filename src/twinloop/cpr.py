@@ -105,3 +105,11 @@ def center_component(mask_slice: np.ndarray) -> np.ndarray:
 
 def r_eq_mm(lumen_slice: np.ndarray, pixel_mm: float = 0.2) -> float:
     return float(np.sqrt(np.count_nonzero(lumen_slice) * pixel_mm**2 / np.pi))
+
+
+def r_ins_2d_mm(lumen_slice: np.ndarray, pixel_mm: float = 0.2) -> float:
+    """Inscribed-circle radius of a 2D component: max of its Euclidean distance transform."""
+    m = np.asarray(lumen_slice) > 0
+    if not m.any():
+        return 0.0
+    return float(ndimage.distance_transform_edt(m).max() * pixel_mm)

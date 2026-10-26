@@ -59,6 +59,10 @@ class V2Options:
     flow_mode: str = "auto"
     decider: str = "learned"  # "learned" | "rules" (rules: RulesDecider, used by the evaluation)
     radius_mode: Literal["inscribed", "area_eq"] = "inscribed"  # SPEC_V2 §13b
+    lumen_model: str = "lumen"  # model folder under models/v2 (S23: "lumen_v3")
+    lumen_radius_out: Literal["eq", "ins"] = "eq"  # defaults = old lumen behaviour
+    lumen_fallback: Literal["v1", "nearest", "interp"] = "v1"
+    lumen_sigma: float = 1.0
 
 
 def _empty_anatomy(message: str) -> Anatomy:
@@ -174,11 +178,12 @@ def run_pipeline(
     device = _device() if v2 is not None and (v2.repair or v2.lumen) else "cpu"
     models: dict = {}
     lumen_model = None
+    lumen_stats: dict = {}
     if v2 is not None and v2.repair:  # fail early if a model is missing
         decider = RulesDecider() if v2.decider == "rules" else load_model("decider", device)
         models = {"decider": decider, "gapfill": load_model("gapfill", device)}
     if v2 is not None and v2.lumen:
-        lumen_model = load_model("lumen", device)
+        lumen_model = load_model(v2.lumen_model, device)
 
     seg_s = 0.0
     warnings: list[str] = []
@@ -225,7 +230,17 @@ def run_pipeline(
         radius_s = time.perf_counter() - t_a
     if lumen_model is not None:
         t_l = time.perf_counter()
-        warnings += refine_radii(trees, image, lumen_model, P2.cpr, device)
+        warnings += refine_radii(
+            trees,
+            image,
+            lumen_model,
+            P2.cpr,
+            device,
+            radius_out=v2.lumen_radius_out,
+            fallback=v2.lumen_fallback,
+            sigma=v2.lumen_sigma,
+            stats=lumen_stats,
+        )
         lumen_s = time.perf_counter() - t_l
     lesion_maps = [_lesions_for_tree(tree, params) for tree in trees]
     centerline_s = time.perf_counter() - t
@@ -317,6 +332,7 @@ def run_pipeline(
             else round(anat.myo_volume_ml, 1),
             flow_mode=flow_mode_used,
             radius_mode=v2.radius_mode,
+            lumen_fallback_fraction=lumen_stats.get("fallback_fraction"),
             branch_labels=branch_labels,
             repair_actions=[dataclasses.asdict(a) for a in repair_actions],
             review_flags=review_flags,

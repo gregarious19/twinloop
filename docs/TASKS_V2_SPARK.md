@@ -384,7 +384,7 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 ---
 
-## [ ] S23 — Lumen v3: oversampled narrow slices, inscribed output, stratified validation
+## [x] S23 — Lumen v3: oversampled narrow slices, inscribed output, stratified validation
 **Depends on:** S21. Order of work: S21 → S23 → S22 (CPU, while S23 trains) → S24. SPARK also owns `train/**` and `reports/v2_training.md` (D-V2-S21). `nets.py` (LumenNet) and the lumen npz files on disk are not changed. No test, v2_holdout or v2_realfail case is used; validation = the `split_case_ids` validation part of v2_train.
 **Files:** `scripts/count_lumen_slices.py`, `train/train_lumen_v3.py`, `src/twinloop/cpr.py` (`r_ins_2d_mm`), `src/twinloop/lumen.py` (`refine_radii` options), `pipeline.py` (`V2Options.lumen_model` + refine options, defaults = old), `tests/`, `reports/v3_lumen_training.md`, `reports/v2_training.md`, `docs/DECISIONS_V2.md`.
 **Steps:**

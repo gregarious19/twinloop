@@ -67,6 +67,7 @@ class V2Out(BaseModel):
     myocardium_ml: float | None
     flow_mode: str
     radius_mode: str = "inscribed"  # added in S20; older result.json files lack it
+    lumen_fallback_fraction: float | None = None  # added in S23; None when lumen is off
     branch_labels: dict[str, str]
     repair_actions: list[dict]
     review_flags: list[dict]

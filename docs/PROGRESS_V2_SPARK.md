@@ -253,3 +253,6 @@ Rule and §13c are in reports/v3_stenosis_set.json and docs/SPEC_V2.md.
 
 ### S22 — area_eq junction fix (2026-10-27)
 Verify (reports/v3_area_eq_fix.md, 50 first v2_train ids, GT masks): lesions mild/moderate/severe — inscribed 85/72/13 (170); area_eq 370/19/0 (389, 2.29×); area_eq_fixed 148/8/6 (162, 0.95×; severe 0.46× inscribed). Adoption criterion (≤1.25× total and ≥0.50× severe): fixed NOT met (severe 0.46); unfixed not met. Not adopted, default unchanged. Tests: `pytest tests/test_metrics_v2.py` 7 passed.
+
+### S23 — Lumen v3 (2026-10-27)
+3 seeds finished, none killed: moderate+ r_ins validation error 0.415 / 0.425 / 0.408 mm (old model 0.453); seed 2 exported as `lumen_v3`. Frozen settings: radius_out=ins, fallback=interp, sigma=0 (grid: reports/v3_lumen_freeze_grid.csv; moderate+ error at GT lesion minima still ~1.09 mm, all over-estimates). Reports: reports/v3_lumen_training.md, reports/v2_training.md ("Lumen v3"). Container `twinloop-v2-train-lumen3` has exited; no job is running.

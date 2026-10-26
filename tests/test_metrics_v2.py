@@ -113,3 +113,26 @@ def test_area_eq_junction_exclusion_no_junction_is_identity():
     area_eq_radii(a, mask)
     area_eq_radii(b, mask, exclude_junctions=True)
     assert np.array_equal(_main_branch(a).radius_mm, _main_branch(b).radius_mm)
+
+
+def _severe_phantom():
+    from twinloop.phantom import _tube
+
+    mask = _tube(_grid(), lambda z: np.where((z >= 37.0) & (z <= 43.0), 0.4, 1.5))
+    return build_graph(_img(mask), CP, GP)
+
+
+def test_false_sig_lesions_phantoms():
+    from twinloop.metrics import false_sig_lesions
+
+    healthy = build_graph(make_phantom("tube")[1], CP, GP)
+    severe = _severe_phantom()
+    assert [les.ds for b in severe.trees[0].branches.values() for les in detect_lesions(b, LP)]
+    assert (
+        max(les.ds for b in severe.trees[0].branches.values() for les in detect_lesions(b, LP))
+        >= 0.5
+    )
+    assert false_sig_lesions(healthy, healthy, LP) == 0
+    assert false_sig_lesions(severe, severe, LP) == 0  # same lesion in GT and prediction
+    assert false_sig_lesions(healthy, severe, LP) == 1  # lesion with no GT lesion nearby
+    assert false_sig_lesions(severe, healthy, LP) == 0  # a missed lesion is not a false one

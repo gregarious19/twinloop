@@ -203,3 +203,31 @@ def summarize_stenosis(rows: list[dict]) -> dict:
         out[f"down{thr}"] = sum(1 for r in sev if not r["missed"] and r["ds_pred"] < thr / 100.0)
         out[f"down{thr}_denom"] = len(sev)
     return out
+
+
+FALSE_SIG_DS = 0.5
+FALSE_SIG_MATCH_MM = 5.0
+
+
+def _lesion_points(g: CoronaryGraph, lp: LesionParams, min_ds: float) -> np.ndarray:
+    pts = [
+        b.points_mm[les.min_idx]
+        for t in g.trees
+        for b in t.branches.values()
+        for les in detect_lesions(b, lp)
+        if les.ds >= min_ds
+    ]
+    return np.array(pts, dtype=float).reshape(-1, 3)
+
+
+def false_sig_lesions(g_gt: CoronaryGraph, g_pred: CoronaryGraph, lp: LesionParams) -> int:
+    """Predicted lesions (v1 detect_lesions, ds >= 0.5) with no GT lesion (ds >= 0.25) within 5 mm.
+
+    Compared at the minimum point of each lesion (SPEC_V2 §13c).
+    """
+    gt_pts = _lesion_points(g_gt, lp, lp.ds_threshold)
+    n = 0
+    for p in _lesion_points(g_pred, lp, FALSE_SIG_DS):
+        if len(gt_pts) == 0 or np.min(np.linalg.norm(gt_pts - p, axis=1)) > FALSE_SIG_MATCH_MM:
+            n += 1
+    return n
