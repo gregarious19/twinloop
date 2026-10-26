@@ -66,6 +66,7 @@ class V2Out(BaseModel):
     qc: dict[str, bool]
     myocardium_ml: float | None
     flow_mode: str
+    radius_mode: str = "inscribed"  # added in S20; older result.json files lack it
     branch_labels: dict[str, str]
     repair_actions: list[dict]
     review_flags: list[dict]

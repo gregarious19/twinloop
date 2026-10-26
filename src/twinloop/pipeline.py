@@ -9,6 +9,7 @@ import time
 import traceback
 from collections.abc import Callable
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import SimpleITK as sitk
@@ -31,6 +32,7 @@ from twinloop.io import load_image, load_mask, save_nifti
 from twinloop.lesions import Lesion, detect_lesions
 from twinloop.lumen import refine_radii
 from twinloop.modelio import load_model
+from twinloop.radius import area_eq_radii
 from twinloop.repair import RulesDecider, run_repair
 from twinloop.schema import (
     DISCLAIMER,
@@ -56,6 +58,7 @@ class V2Options:
     lumen: bool = False
     flow_mode: str = "auto"
     decider: str = "learned"  # "learned" | "rules" (rules: RulesDecider, used by the evaluation)
+    radius_mode: Literal["inscribed", "area_eq"] = "area_eq"  # SPEC_V2 §13b
 
 
 def _empty_anatomy(message: str) -> Anatomy:
@@ -181,7 +184,7 @@ def run_pipeline(
     warnings: list[str] = []
     anat: Anatomy | None = None
     anatomy_failed = False
-    anatomy_s = repair_s = lumen_s = 0.0
+    anatomy_s = repair_s = lumen_s = radius_s = 0.0
     if mask is None or (v2 is not None and v2.anatomy):
         step("segmenting")
     if mask is None:
@@ -216,6 +219,10 @@ def run_pipeline(
         )
         repair_s = time.perf_counter() - t_r
     trees = extract_trees(mask, params.centerline)
+    if v2 is not None and v2.radius_mode == "area_eq":
+        t_a = time.perf_counter()
+        area_eq_radii(trees, mask, P2.cpr, params.centerline)
+        radius_s = time.perf_counter() - t_a
     if lumen_model is not None:
         t_l = time.perf_counter()
         warnings += refine_radii(trees, image, lumen_model, P2.cpr, device)
@@ -309,6 +316,7 @@ def run_pipeline(
             if anat is None or anat.myo_volume_ml is None
             else round(anat.myo_volume_ml, 1),
             flow_mode=flow_mode_used,
+            radius_mode=v2.radius_mode,
             branch_labels=branch_labels,
             repair_actions=[dataclasses.asdict(a) for a in repair_actions],
             review_flags=review_flags,
@@ -316,6 +324,7 @@ def run_pipeline(
                 "anatomy": round(anatomy_s, 1),
                 "repair": round(repair_s, 1),
                 "lumen": round(lumen_s, 1),
+                "radius": round(radius_s, 1),
             },
         ),
     )
@@ -336,6 +345,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-anatomy", action="store_true")
     ap.add_argument("--repair", action="store_true")
     ap.add_argument("--lumen", action="store_true")
+    ap.add_argument("--radius-mode", choices=["inscribed", "area_eq"], default="area_eq")
     ap.add_argument("--flow-mode", choices=V2_DEFAULT_FLOW_MODES, default="auto")
     args = ap.parse_args(argv)
 
@@ -373,6 +383,7 @@ def main(argv: list[str] | None = None) -> int:
                 repair=args.repair,
                 lumen=args.lumen,
                 flow_mode=args.flow_mode,
+                radius_mode=args.radius_mode,
             ),
         )
     except Exception as exc:

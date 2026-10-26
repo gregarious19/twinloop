@@ -223,4 +223,15 @@ Findings (reports/v2_diagnostics.md): healthy-point radius bias of pred_v1 +0.02
 ### S19 — Radius definition and widened-rate calibration (2026-10-26)
 Verify output: `20 23281 {'gt_s0.25': 20, 'gt_s0.5': 20, 'gt_s0.75': 20, 'gt_s1.0': 20, 'pred_v1': 20}`
 Findings (reports/v2_diag2.md): H-def partly true: area-equivalent radius exceeds inscribed by +0.25 mm at lesion minima (+0.31 healthy); like-for-like lumen error on GT centerlines still 0.51 mm (needs <= 0.2), so ~58 % of the 0.91 mm signed error is the definition mismatch, the rest a real overestimate at stenoses. Widened rate: GT blurred sigma 0.25-1.0 mm gives 0.28-0.65 vs pred_v1 0.90 (Dice-matched sigma 1.0 -> 0.649); even sigma 0.25 (Dice 0.998) widens 28 %. Severe lesions (n=4) widened equally by pred_v1 and smoothed GT. Nothing retrained or changed.
+(pushed to origin/v2 on owner request)
+
+### S20 — Area-equivalent radius, stenosis error metric, re-score (2026-10-26)
+Verify output:
+```
+{('gt', 'area_eq', 'ok'): 20, ('gt', 'inscribed', 'ok'): 20, ('gt_blur0.5', 'area_eq', 'ok'): 20, ('gt_blur0.5', 'inscribed', 'ok'): 20, ('pred_lumen', 'area_eq', 'ok'): 20, ('pred_repair', 'area_eq', 'ok'): 20, ('pred_repair_lumen', 'area_eq', 'ok'): 20, ('pred_v1', 'area_eq', 'ok'): 20, ('pred_v1', 'inscribed', 'ok'): 20}
+{('gt', 'area_eq'): 160, ('gt', 'inscribed'): 86, ('gt_blur0.5', 'area_eq'): 160, ('gt_blur0.5', 'inscribed'): 86, ('pred_lumen', 'area_eq'): 160, ('pred_repair', 'area_eq'): 160, ('pred_repair_lumen', 'area_eq'): 160, ('pred_v1', 'area_eq'): 160, ('pred_v1', 'inscribed'): 86}
+```
+Tests: `pytest -q` 136 passed; ruff check + format clean. Sanity: pred_v1/inscribed reproduces S16 exactly (dice, widened_rate, min FFR differ by 0.0).
+Findings (reports/v2b_results.md, exploratory, no verdicts): pred_v1 moderate+severe mean ds_err_pp -24.1 (area_eq) vs -51.2 (inscribed); lumen -26.6, repair -26.1, repair+lumen -28.0; gt_blur0.5 floor -13.2. Area_eq gives 160 GT lesions vs 86 inscribed (mild 48 -> 144, cause not investigated), so bins are not comparable across modes. Radius switch raises min FFR (gt mean +0.098, pred_v1 +0.037); 4 (gt) and 2 (pred_v1) cases cross 0.80 upward, 0 downward. Defaults: radius_mode now "area_eq" (owner decision); repair/lumen unchanged. See D-V2-S20.
 WAITING ON OWNER: git push origin v2
+

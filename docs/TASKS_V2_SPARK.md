@@ -352,3 +352,18 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 **Acceptance:** both CSVs cover all 20 cases (failures kept with an error column); no empty report cells; ruff check/format check on `scripts/diag_v2b.py` and `pytest -q` pass.
 **Verify:** `./scripts/dk python -c "import pandas as pd; a=pd.read_csv('reports/v2_diag2_radius.csv'); b=pd.read_csv('reports/v2_diag2_calib.csv'); print(a.case_id.nunique(), len(a), b.groupby('source').size().to_dict())"`
+
+---
+
+## [x] S20 — Area-equivalent radius, stenosis error metric, re-score
+**Depends on:** S19. **Changes library code and one v2 default** (`V2Options.radius_mode`, default `"area_eq"`). No retraining. `reports/V2_RESULTS.md`, `reports/v2_eval.csv` and the S18/S19 reports are not edited.
+**Files:** `src/twinloop/radius.py` (new), `pipeline.py`, `schema.py`, `metrics.py`, `tests/test_metrics_v2.py`, `scripts/eval_v2b.py`, `docs/SPEC_V2.md` §13b (committed first as `S20a`), `reports/v2b_lesions.csv`, `reports/v2b_cases.csv`, `reports/v2b_results.md`.
+**Steps:**
+1. **A:** `radius_mode` in `V2Options` (`v2=None` stays v1/inscribed); `area_eq_radii(graph, mask, spacing)` replaces branch radii by the area-equivalent radius of the final mask (CPR geometry of the lumen model, nearest-component fallback, v1 smoothing) after `extract_trees`, before lumen/lesions/solver; `radius_mode` in the optional `v2` block of result.json.
+2. **B:** `stenosis_errors` and `summarize_stenosis` in `metrics.py` (old `stenosis_metrics` untouched) and CPU phantom tests.
+3. **C:** SPEC §13b with the guard for future hypotheses, committed alone: `S20a: SPEC §13b stenosis metric and guard`.
+4. **D:** `scripts/eval_v2b.py` on the 20 regression cases: sources gt, gt_blur0.5, pred_v1 (inscribed + area_eq), pred_lumen, pred_repair, pred_repair_lumen (area_eq); `reports/v2b_results.md` without verdicts.
+5. Log choices in DECISIONS_V2.md, paste the verify output in PROGRESS_V2_SPARK.md, commit `S20: area-equivalent radius, stenosis error metric, re-score`; do not push (`WAITING ON OWNER: git push origin v2`).
+
+**Acceptance:** `./scripts/dk pytest -q` and `ruff check . && ruff format --check .` pass; both CSVs cover all 20 cases for every source/mode row (failures kept with an error); `v2b_results.md` has no empty cells.
+**Verify:** `./scripts/dk python -c "import pandas as pd; c=pd.read_csv('reports/v2b_cases.csv'); l=pd.read_csv('reports/v2b_lesions.csv'); print(c.groupby(['source','radius_mode']).status.value_counts().to_dict()); print(l.groupby(['source','radius_mode']).size().to_dict())"`

@@ -122,3 +122,84 @@ def stenosis_metrics(g_gt: CoronaryGraph, g_pred: CoronaryGraph, lp: LesionParam
         "mean_abs_rmin_err_mm": float(np.mean(errs)) if errs else float("nan"),
         "widened_rate": widened / n if n else float("nan"),
     }
+
+
+STENOSIS_BINS = (("mild", 0.25, 0.5), ("moderate", 0.5, 0.7), ("severe", 0.7, 1.0 + 1e-9))
+MATCH_MM = 2.0
+WINDOW_MM = 2.0
+
+
+def _bin_of(ds: float) -> str:
+    for name, lo, hi in STENOSIS_BINS:
+        if lo <= ds < hi:
+            return name
+    return "sub"
+
+
+def _window_ds(branch, ref: np.ndarray, i: int) -> tuple[float, float]:
+    """(max ds, radius there) over the points within +-WINDOW_MM arc length of point i."""
+    win = np.nonzero(np.abs(branch.s_mm - branch.s_mm[i]) <= WINDOW_MM)[0]
+    ds_w = 1.0 - branch.radius_mm[win] / ref[win]
+    k = int(np.argmax(ds_w))
+    return float(ds_w[k]), float(branch.radius_mm[win[k]])
+
+
+def stenosis_errors(g_gt: CoronaryGraph, g_pred: CoronaryGraph, lp: LesionParams) -> list[dict]:
+    """One row per GT lesion: severity error of the prediction near its narrowest point (§13b)."""
+    pred = [b for t in [*g_pred.trees, *g_pred.fragments] for b in t.branches.values()]
+    pts = np.concatenate([b.points_mm for b in pred]) if pred else np.zeros((0, 3))
+    owner = [(b, i) for b in pred for i in range(len(b.s_mm))]
+    refs = {b.branch_id: reference_radius(b.s_mm, b.radius_mm, lp) for b in pred}
+    nan = float("nan")
+    rows = []
+    for t in g_gt.trees:
+        for b in t.branches.values():
+            ref_gt = reference_radius(b.s_mm, b.radius_mm, lp)
+            for les in detect_lesions(b, lp):
+                ds_gt, rmin_gt = _window_ds(b, ref_gt, les.min_idx)  # same rule as the prediction
+                row = {
+                    "case_id": "", "lesion_id": f"{b.branch_id}_p{les.min_idx}", "ds_gt": ds_gt,
+                    "ds_pred": nan, "ds_err_pp": nan, "rmin_gt": rmin_gt, "rmin_pred": nan,
+                    "rmin_err_mm": nan, "missed": True, "bin": _bin_of(ds_gt),
+                    "ds_lesion": les.ds, "rmin_lesion": les.r_min_mm,
+                }  # fmt: skip
+                if len(pts):
+                    d = np.linalg.norm(pts - b.points_mm[les.min_idx], axis=1)
+                    j = int(np.argmin(d))
+                    if d[j] <= MATCH_MM:
+                        pb, i = owner[j]
+                        ds_pred, r_pred = _window_ds(pb, refs[pb.branch_id], i)
+                        row.update(
+                            ds_pred=ds_pred, ds_err_pp=100.0 * (ds_pred - ds_gt),
+                            rmin_pred=r_pred, rmin_err_mm=r_pred - rmin_gt, missed=False,
+                        )  # fmt: skip
+                rows.append(row)
+    return rows
+
+
+def summarize_stenosis(rows: list[dict]) -> dict:
+    """Per severity bin error statistics plus the down50 / down70 counts (SPEC_V2 §13b)."""
+
+    def stats(sel: list[dict]) -> dict:
+        m = [r for r in sel if not r["missed"]]
+        e = np.array([r["ds_err_pp"] for r in m], dtype=float)
+        x = np.array([r["rmin_err_mm"] for r in m], dtype=float)
+
+        def f(fn, a):
+            return float(fn(a)) if len(a) else float("nan")
+
+        return {
+            "n": len(sel), "n_missed": len(sel) - len(m),
+            "mean_ds_err_pp": f(np.mean, e), "median_ds_err_pp": f(np.median, e),
+            "mean_abs_ds_err_pp": f(np.mean, np.abs(e)),
+            "mean_rmin_err_mm": f(np.mean, x), "mean_abs_rmin_err_mm": f(np.mean, np.abs(x)),
+        }  # fmt: skip
+
+    out: dict = {"bins": {n: stats([r for r in rows if r["bin"] == n]) for n in
+                          ("mild", "moderate", "severe", "sub")}}  # fmt: skip
+    out["moderate_severe"] = stats([r for r in rows if r["bin"] in ("moderate", "severe")])
+    for thr in (50, 70):
+        sev = [r for r in rows if r["ds_gt"] >= thr / 100.0]
+        out[f"down{thr}"] = sum(1 for r in sev if not r["missed"] and r["ds_pred"] < thr / 100.0)
+        out[f"down{thr}_denom"] = len(sev)
+    return out

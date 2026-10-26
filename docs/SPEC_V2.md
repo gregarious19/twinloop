@@ -800,8 +800,10 @@ Per GT lesion: take the nearest `g_pred` point to the GT lesion's minimum point.
 `missed=True`, other fields NaN. Otherwise, on the matched pred branch, the window of points within
 ±2 mm arc length of the matched point; `ds_pred = max over the window of (1 − r / r_ref)` with
 `r_ref` = the pred branch's `reference_radius` (the window absorbs small position shifts).
+The GT side uses the same rule on the GT branch around its lesion minimum (so `stenosis_errors(g, g)`
+is exactly 0); the v1 `Lesion.ds` / `r_min_mm` are kept as `ds_lesion` / `rmin_lesion`.
 Fields: `case_id` (caller), `lesion_id`, `ds_gt`, `ds_pred`, `ds_err_pp = 100·(ds_pred − ds_gt)`,
-`rmin_gt`, `rmin_pred` (radius at the window's max-ds point), `rmin_err_mm` (signed, pred − gt),
+`rmin_gt`, `rmin_pred` (radius at the respective window's max-ds point), `rmin_err_mm` (signed, pred − gt),
 `missed`, `bin` by `ds_gt`: mild [0.25, 0.5), moderate [0.5, 0.7), severe [0.7, 1.0]; below 0.25 →
 "sub". `summarize_stenosis`: per bin n, n_missed, mean / median / mean-abs `ds_err_pp`, mean /
 mean-abs `rmin_err_mm`; overall `down50` = #(ds_gt ≥ 0.5, matched, ds_pred < 0.5) with its
