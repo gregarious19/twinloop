@@ -244,3 +244,12 @@ case_ids: [187, 791, 249, 983, 546, 1, 147, 989, 181, 336, 351, 469, 486, 842, 1
 lesions_per_bin: {'mild': 53, 'moderate': 71, 'severe': 19}
 ```
 Rule and §13c are in reports/v3_stenosis_set.json and docs/SPEC_V2.md.
+
+### In progress (2026-10-27 00:19 IST) — S23 lumen v3 training
+- Container `twinloop-v2-train-lumen3` runs seeds 0, 1, 2 sequentially (30000 steps, batch 4; bench 0.55 s/step incl. startup, so ~4–5 h/seed). Outputs `/data/v2/runs/lumen_v3/seed{0,1,2}/` (train_log.csv, best.pt, best_val.json, metrics.json when finished). A killed seed writes `metrics.json` with `"killed": true` and the loop moves on.
+- Check: `sg docker -c 'docker logs --tail 5 twinloop-v2-train-lumen3'`; `tail -3 ~/twinloop-data/v2/runs/lumen_v3/seed*/train_log.csv`. Do not edit `train/**`, `lumen.py`, `cpr.py` while it runs (later seeds import them).
+- Old deployed model, same stratified validation (jit val files, mm): r_ins healthy 0.177 / mild 0.344 / mod+ 0.453; r_eq 0.120 / 0.286 / 0.478 (n 96262 / 1420 / 368) → `/data/v2/runs/lumen_v3/old_reference/old_model_validation.json`.
+- Done so far in S23: step 1 counts (reports/v3_lumen_training.md), step 2 (`r_ins_2d_mm`, `refine_radii` options + 6 tests), V2Options lumen_model/radius_out/fallback/sigma, `V2Out.lumen_fallback_fraction`. Uncommitted until S23 ends. Remaining: steps 4, 5 (export), 6, 7.
+
+### S22 — area_eq junction fix (2026-10-27)
+Verify (reports/v3_area_eq_fix.md, 50 first v2_train ids, GT masks): lesions mild/moderate/severe — inscribed 85/72/13 (170); area_eq 370/19/0 (389, 2.29×); area_eq_fixed 148/8/6 (162, 0.95×; severe 0.46× inscribed). Adoption criterion (≤1.25× total and ≥0.50× severe): fixed NOT met (severe 0.46); unfixed not met. Not adopted, default unchanged. Tests: `pytest tests/test_metrics_v2.py` 7 passed.

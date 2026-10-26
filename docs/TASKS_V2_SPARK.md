@@ -381,3 +381,32 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 **Acceptance:** JSON has 30 ids, none in the regression set or test split; §13c committed; pytest and ruff pass.
 **Verify:** print the 30 ids and `lesions_per_bin`; paste in PROGRESS.
+
+---
+
+## [ ] S23 — Lumen v3: oversampled narrow slices, inscribed output, stratified validation
+**Depends on:** S21. Order of work: S21 → S23 → S22 (CPU, while S23 trains) → S24. SPARK also owns `train/**` and `reports/v2_training.md` (D-V2-S21). `nets.py` (LumenNet) and the lumen npz files on disk are not changed. No test, v2_holdout or v2_realfail case is used; validation = the `split_case_ids` validation part of v2_train.
+**Files:** `scripts/count_lumen_slices.py`, `train/train_lumen_v3.py`, `src/twinloop/cpr.py` (`r_ins_2d_mm`), `src/twinloop/lumen.py` (`refine_radii` options), `pipeline.py` (`V2Options.lumen_model` + refine options, defaults = old), `tests/`, `reports/v3_lumen_training.md`, `reports/v2_training.md`, `docs/DECISIONS_V2.md`.
+**Steps:**
+1. Count slices and distinct lesion runs per bin (healthy < 0.25, mild [0.25,0.5), moderate [0.5,0.7), severe ≥ 0.7; clean vs jit) on the train part → `reports/v3_lumen_training.md`, before training.
+2. `cpr.r_ins_2d_mm(comp, pixel_mm)`; `refine_radii(..., radius_out="eq"|"ins", fallback="v1"|"nearest"|"interp", sigma=1.0)` with old behaviour as defaults; fallback fraction returned/logged; CPU unit tests per option.
+3. `train/train_lumen_v3.py`: 50 % lesion windows (moderate+ 50 % / mild 50 % of the lesion-slice draw, window at uniform offset), per-slice loss weights 1/3/6, validation every 2000 steps on jit files only with per-bin |Δr_ins| and |Δr_eq|, model selection = moderate+ r_ins error, kill if > 0.5 mm at 25 % of the steps; 30 000 steps, batch 4, seeds 0/1/2, detached Docker; deployed old model evaluated with the same validation.
+4. Freeze inference settings on validation cases only: grid fallback × sigma, `radius_out="ins"`; log the grid in DECISIONS_V2.md.
+5. Export best seed as `lumen_v3` (keep `lumen`); add `V2Options.lumen_model="lumen"` and the three refine options (old defaults). No other default changes.
+6. "Lumen v3" section in `reports/v2_training.md`; finish `reports/v3_lumen_training.md`.
+7. Commit `S23: lumen v3 training and frozen inference settings`.
+
+**Acceptance:** 3 seeds finished or killed (killed seeds reported); pytest + ruff pass.
+
+---
+
+## [x] S22 — area_eq junction fix (CPU, while S23 trains). Not used by H3
+**Depends on:** S20. Runs on CPU only; does not touch `train/**`, `lumen.py`, `cpr.py` (S23 seeds import them). `radius_mode` default is NOT changed either way.
+**Files:** `src/twinloop/radius.py` (`exclude_junctions` option, default off), `tests/test_metrics_v2.py`, `scripts/eval_area_eq_fix.py`, `reports/v3_area_eq_fix.md`.
+**Steps:**
+1. In `area_eq_radii`, optionally skip slices whose arc-length distance to a junction (branch start with a parent / branch end with children) is < 1.5 × local inscribed radius + 1.0 mm, and linearly interpolate r across them.
+2. Evaluate ONLY on the first 50 v2_train case ids (GT masks): GT lesion counts per bin (mild/moderate/severe, v1 `detect_lesions`) under inscribed, area_eq before the fix and area_eq after the fix.
+3. Adoption criterion (reported, not applied): area_eq total lesions ≤ 1.25 × inscribed and severe count ≥ 50 % of inscribed.
+4. Commit `S22: area_eq junction exclusion`.
+
+**Acceptance:** tests + ruff pass; report has no empty cells.

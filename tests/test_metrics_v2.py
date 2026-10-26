@@ -91,3 +91,25 @@ def test_stenosis_errors_missed_when_no_pred_nearby():
     rows = stenosis_errors(g, empty, LP)
     assert rows and all(r["missed"] and np.isnan(r["ds_err_pp"]) for r in rows)
     assert summarize_stenosis(rows)["down50"] == 0
+
+
+def test_area_eq_junction_exclusion_y_tree():
+    _, mask = make_phantom("y_tree")
+    plain, fixed = extract_trees(mask, CP), extract_trees(mask, CP)
+    area_eq_radii(plain, mask)
+    area_eq_radii(fixed, mask, exclude_junctions=True)
+    n_junction = 0
+    for tp, tf in zip(plain, fixed, strict=True):
+        for bp, bf in zip(tp.branches.values(), tf.branches.values(), strict=True):
+            assert np.all(np.isfinite(bf.radius_mm))
+            assert bf.radius_mm.max() <= bp.radius_mm.max() + 1e-6  # never adds area
+            n_junction += int(bf.parent_id is not None or bool(bf.children))
+    assert n_junction >= 2
+
+
+def test_area_eq_junction_exclusion_no_junction_is_identity():
+    _, mask = make_phantom("tube")
+    a, b = extract_trees(mask, CP), extract_trees(mask, CP)
+    area_eq_radii(a, mask)
+    area_eq_radii(b, mask, exclude_junctions=True)
+    assert np.array_equal(_main_branch(a).radius_mm, _main_branch(b).radius_mm)
