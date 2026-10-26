@@ -144,12 +144,17 @@ def main(argv=None) -> int:
     ap.add_argument("--variants", required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--shard", help="K/N: run only every N-th case, starting at K (0-based)")
+    ap.add_argument("--skip-from", type=Path, help="CSV whose (case, variant) rows are not rerun")
     args = ap.parse_args(argv)
     variants = args.variants.split(",")
     for v in variants:
         if v not in VARIANTS:
             ap.error(f"unknown variant {v}")
     cases = case_list(args.cases)[: args.limit]
+    if args.shard:
+        k, n = (int(x) for x in args.shard.split("/"))
+        cases = cases[k::n]
     out = args.out if args.out.is_absolute() else Path.cwd() / args.out
     done: set[tuple[int, str]] = set()
     if out.exists():
@@ -159,6 +164,9 @@ def main(argv=None) -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "w", newline="") as f:
             csv.DictWriter(f, COLUMNS).writeheader()
+    if args.skip_from and args.skip_from.exists():
+        with open(args.skip_from, newline="") as f:
+            done |= {(int(r["case_id"]), r["variant"]) for r in csv.DictReader(f)}
     gt_cache: dict = {}
     for cid in cases:
         for v in variants:

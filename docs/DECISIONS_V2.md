@@ -70,3 +70,6 @@ ones at the end (prefix with the task ID). CLUSTER writes to docs/DECISIONS_CLUS
 
 ## D-V2-S13a — first-pass masks predicted, not taken from nnU-Net validation (2026-10-26)
 The v1 `twinloop-train` container was killed (exit 137, 10:20 IST) during its final validation pass; only 8 of 160 fold-0 validation predictions exist. Per SPEC §13 fallback, `scripts/predict_firstpass.py` runs `nnUNetv2_predict` (fold 0, `checkpoint_final`, `--disable_tta`, same as v1 `segment_nnunet`) on all v2_holdout + v2_realfail cases into `/data/v2/firstpass/`; `eval_v2.py` prefers these files. Regression-set cases are predicted first. Test-split cases are never predicted.
+
+## D-V2-S16 — defaults unchanged; evaluation run in shards (2026-10-26)
+H1: pred_v2_repair − pred_v1 branch_recall −0.010 (need ≥ +0.02), false_branch_rate −0.074, widened_rate −0.005 → FALSIFIED. H2: pred_v2_repair_lumen − pred_v2_repair |r_min| err +0.305 mm (worse in 19/20) → FALSIFIED. Therefore `V2Options.repair` and `lumen` defaults stay False; no `pipeline.py` change. Evaluation executed once: first container stopped after 12 rows (resumable script), remainder run as 3 parallel `--shard K/N` processes (`--shard`, `--skip-from` added to scripts/eval_v2.py; no metric or parameter changed), merged into reports/v2_eval.csv (100 unique rows).

@@ -209,3 +209,8 @@ OK case_id=s15_3 trees=2 lesions=7 min_ffr=0.989 total_s=72.0   (v2_train 3, GT 
 OK case_id=s15_1 trees=2 lesions=5 min_ffr=0.980 total_s=80.5   (v2_realfail 1, first-pass mask)  n_actions=37  review_flags=16
 ```
 Timings (s): anatomy 71/51/52, repair 10/10/18, lumen 0.7/0.6/0.6. All < 300 s. Observations (not tuned): lumen step takes <1 s, so I have not verified it changes radii; repair on GT masks still proposes extend/stop actions (GT vessels end at r~1 mm, see S04 notes). FFR values unvalidated.
+- S16 started 2026-10-26_20:48:55: container twinloop-v2-eval-final writing reports/v2_eval.csv (run once; no changes after).
+- S16 restarted as 3 parallel shards 2026-10-26_20:58:45 (twinloop-v2-eval-s0..s2; first container stopped after 12 rows -> reports/v2_eval_part0.csv). Merge into reports/v2_eval.csv when done. Only eval_v2.py got --shard/--skip-from; no parameter/model changed.
+
+### S16 — Final v2 evaluation (2026-10-26)
+reports/v2_eval.csv: 100 rows, all ok. H1 FALSIFIED (branch recall −0.010), H2 FALSIFIED (|r_min| err +0.305 mm). Defaults unchanged (D-V2-S16). See reports/V2_RESULTS.md. All tasks now `[x]`; remaining: final tests/ruff check and the owner's git remote/push (WAITING ON OWNER).

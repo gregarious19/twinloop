@@ -284,7 +284,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S16 — Final v2 evaluation and defaults
+## [x] S16 — Final v2 evaluation and defaults
 **Depends on:** S13, S15 (and S14 + CLUSTER C08 if done; otherwise evaluate with the synthetic-only decider and say so)
 **Files:** `reports/v2_eval.csv`, `reports/V2_RESULTS.md`, `src/twinloop/pipeline.py` (defaults only)
 **Steps:**
