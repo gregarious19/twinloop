@@ -233,5 +233,5 @@ Verify output:
 ```
 Tests: `pytest -q` 136 passed; ruff check + format clean. Sanity: pred_v1/inscribed reproduces S16 exactly (dice, widened_rate, min FFR differ by 0.0).
 Findings (reports/v2b_results.md, exploratory, no verdicts): pred_v1 moderate+severe mean ds_err_pp -24.1 (area_eq) vs -51.2 (inscribed); lumen -26.6, repair -26.1, repair+lumen -28.0; gt_blur0.5 floor -13.2. Area_eq gives 160 GT lesions vs 86 inscribed (mild 48 -> 144, cause not investigated), so bins are not comparable across modes. Radius switch raises min FFR (gt mean +0.098, pred_v1 +0.037); 4 (gt) and 2 (pred_v1) cases cross 0.80 upward, 0 downward. Defaults: radius_mode now "area_eq" (owner decision); repair/lumen unchanged. See D-V2-S20.
-WAITING ON OWNER: git push origin v2
+(pushed to origin/v2 on owner request)
 
