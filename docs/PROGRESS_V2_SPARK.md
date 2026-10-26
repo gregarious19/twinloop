@@ -183,3 +183,11 @@ Note: pred_v1 widened_rate 0.90 is very high (nearly every GT lesion looks less 
 
 ### S14 — Real-failure decider dataset (2026-10-26)
 `scripts/make_decider_real.py` (v2_realfail only, first-pass masks from `/data/v2/firstpass/`, D-V2-S13a) → `/data/v2/datasets/decider_real/decider_real.parquet`: cases used 73, skipped 0, rows 2675; labels {keep 2219, remove 247, extend 131, restore 70, add 8}. No rsync needed (D-V2-S: training on this machine; C08 reads it in place). Only 8 `add` rows, so `add` stays weak for the fine-tune.
+
+### C04 — Gap-filler trained (2026-10-26)
+Seeds 0/1/2 best val new-voxel Dice 0.7856 / 0.7853 / 0.7893 (all 40000 steps, none killed; kill threshold 0.30). C07 will pick seed 2.
+
+### In progress (2026-10-26 15:09 IST)
+- C05: `twinloop-v2-train-lumen` (chain_train.sh) started 15:01 IST, seed 0 at ~0.63 s/step (est. ~5 h/seed, ~16 h for 3 seeds; first estimate). Kill check at step 7500. Unblocked after it: C07 → S15 → C08 → S16. Do not `docker stop` or unpause-pause the chain container carelessly: the script waits on it and moves to the next seed on exit.
+- Stale: S13/S14 done; predictions in /data/v2/firstpass complete (160).
+- WAITING ON OWNER: create a private git remote and push branch v2 (I never push).

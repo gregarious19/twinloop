@@ -132,7 +132,7 @@ logs in `$TWINLOOP_DATA/v2/slurm/`.
 
 ---
 
-## [ ] C04 — Train the gap-filler
+## [x] C04 — Train the gap-filler
 **Depends on:** C03
 **Files:** `train/train_gapfill.py`, `cluster/jobs/train_gapfill.sh`
 **Steps:**
