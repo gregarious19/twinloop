@@ -161,3 +161,5 @@ Note: docker needs `sg docker -c "./scripts/dk ..."` in this shell (docker group
 - Every GT ending is flagged `abrupt_end` (10/11/14 flags, no other kinds): ImageCAS GT vessels stop at r_end 1.0–1.5 mm, which the spec's abrupt rule (r_end >= 0.8 and ratio >= 0.75) calls abrupt. The flag is therefore uninformative on GT masks; expect many on predictions too. Not tuned.
 - Time per case ~130–170 s, almost all heartchambers_highres.
 
+
+- 2026-10-26 10:03 IST: gap-filler training (twinloop-v2-train-gapfill) unpaused by user request; resumed from step ~17100.
