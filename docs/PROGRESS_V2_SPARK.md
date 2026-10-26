@@ -180,3 +180,6 @@ pred_v1  0.787  0.845    0.900          0.169              0.900         0.556
 ```
 Lowest branch_recall (pred_v1): case 366 (0.762), case 688 (0.765), case 236 (0.773).
 Note: pred_v1 widened_rate 0.90 is very high (nearly every GT lesion looks less stenosed in the first-pass tree). Reported as measured; not tuned on.
+
+### S14 — Real-failure decider dataset (2026-10-26)
+`scripts/make_decider_real.py` (v2_realfail only, first-pass masks from `/data/v2/firstpass/`, D-V2-S13a) → `/data/v2/datasets/decider_real/decider_real.parquet`: cases used 73, skipped 0, rows 2675; labels {keep 2219, remove 247, extend 131, restore 70, add 8}. No rsync needed (D-V2-S: training on this machine; C08 reads it in place). Only 8 `add` rows, so `add` stays weak for the fine-tune.

@@ -257,7 +257,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S14 — Real-failure decider dataset
+## [x] S14 — Real-failure decider dataset
 **Depends on:** S08, S12M
 **Files:** `scripts/make_decider_real.py`
 **Steps:**
