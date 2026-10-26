@@ -3,6 +3,22 @@
 Update this file after every task. Newest entries at the top of each section.
 
 ## Done
+### T10 — Segmentation evaluation on the test split (2026-10-26)
+Files: `reports/seg_eval.csv`, `reports/RESULTS.md`. Test split used once, no re-runs, no tuning.
+```
+method=nnunet n=200 dice_mean=0.8078 dice_sd=0.0555 clsens_mean=0.9114
+method=threshold n=200 dice_mean=0.0077 dice_sd=0.0041 clsens_mean=0.4428
+nnunet     count 200  mean 0.807791  std 0.05552  (median 0.8104, min 0.6225, 31 cases < 0.75)
+threshold  count 200  mean 0.007689  std 0.00410
+```
+Hypothesis (test Dice >= 0.75): SUPPORTED. All case_ids are test (`% 5 == 0`), 200 unique per method.
+
+### T09 — Training finished (2026-10-26)
+`checkpoint_final.pth` written 2026-10-26 01:50 UTC after epoch 1000; best EMA pseudo-Dice 0.8422. The container then crashed in nnU-Net's post-training validation (`CUDA driver error: operation not permitted`, exit 1). One resume was tried, then the user chose to skip validation (stopped after ~3 of 160 cases, ~3.8 h with mirroring TTA). Deviation: container did not exit 0, no `validation/summary.json` (D42). Copies in `/data/runs/ckpt_backup/`. T09 step 6 needed no change (`dk`/`dkd` already default to `nnUNetTrainer`).
+```
+ls -la ~/twinloop-data/nnUNet_results/Dataset501_ImageCAS/*/fold_0/checkpoint_final.pth   # both trainers present; nnUNetTrainer 246741085 bytes
+```
+
 ### T08 — Segmentation wrapper, baseline, evaluation scripts (2026-10-26)
 Files: `src/twinloop/segmentation.py` (full), `scripts/eval_seg.py`, `scripts/eval_pipeline.py`, `tests/test_segmentation_gpu.py`. Mechanics only, train cases 1-3 and 1-2, 5-epoch benchmark model; **no test-split case was used**. The numbers below are NOT results.
 ```
