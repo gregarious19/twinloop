@@ -321,3 +321,19 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 ## [x] S17 skipped — (Optional) TotalSegmentator error on MM-WHS
 **Depends on:** S01. **Skip** (mark `[x] skipped` with the reason in PROGRESS) unless `${TWINLOOP_DATA}/raw/mmwhs/` exists (the owner has not downloaded MM-WHS).
 **Steps (only if present):** for each MM-WHS CT training case with labels: run `segment_anatomy`; compare myocardium (MM-WHS label value 205) and ascending aorta (label 820) with Dice after cropping both masks to the bounding box of the MM-WHS aorta label in z; write `reports/v2_mmwhs.csv` (`case,dice_myo,dice_aorta,vol_myo_ts_ml,vol_myo_gt_ml`). Label values are UNCERTAIN: print `np.unique` of one label file first and adapt.
+
+---
+
+## [x] S18 — Diagnose stenosis widening and lumen failure
+**Depends on:** S16. **Analysis only:** no retraining; no model, parameter, threshold or default change; `reports/V2_RESULTS.md` and `reports/v2_eval.csv` are not edited.
+**Cases:** the 20 cases of `reports/v2_regression_set.json` only; first-pass masks as in S16.
+**Files:** `scripts/diag_v2.py` (new), `reports/v2_diagnostics.md`, `reports/v2_diag_points.csv`, `reports/v2_diag_lumen.csv`. No library code is modified.
+**Steps:**
+1. **D1:** signed radius error of the predicted pipeline (pred_v1) at every GT centerline point (branches median r ≥ 0.75 mm, length ≥ 10 mm), labelled lesion/healthy; nearest g_pred point, `d_mm`, `signed_err = r_pred − r_gt` if d ≤ 2 mm, `same_branch`.
+2. **D2:** radius read from the predicted mask by the pipeline's own method (EDT, mm) at the same GT points: `r_predmask_at_gt`, `signed_err_mask`.
+3. **D3:** deployed lumen model via `refine_radii` on GT centerlines, predicted centerlines, and GT centerlines shifted perpendicular by 0.5 / 1.0 mm (random direction per branch, seed 0); r_min error and widened rate with the `stenosis_metrics` rule.
+4. `reports/v2_diagnostics.md`: tables, verdicts, ≤ 3 suggested fixes (not implemented), caveats.
+5. Log choices in DECISIONS_V2.md; paste the verify output in PROGRESS_V2_SPARK.md; commit `S18: stenosis widening and lumen diagnostics`; do not push (`WAITING ON OWNER: git push origin v2`).
+
+**Acceptance:** both CSVs hold all 20 cases (failures kept with an error column); report has no empty cells; ruff check + format check on `scripts/diag_v2.py` and `pytest -q` pass.
+**Verify:** `./scripts/dk python -c "import pandas as pd; a=pd.read_csv('reports/v2_diag_points.csv'); b=pd.read_csv('reports/v2_diag_lumen.csv'); print(a.case_id.nunique(), len(a), b.groupby('input').size().to_dict())"`
