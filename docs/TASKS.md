@@ -220,7 +220,7 @@ docker logs --tail 5 twinloop-train                               # shows Epoch 
 
 ---
 
-## [ ] T08 — Real segmentation wrapper, baseline, evaluation scripts
+## [x] T08 — Real segmentation wrapper, baseline, evaluation scripts
 **Depends on:** T05 (benchmark checkpoint exists), T06
 **Files:** `src/twinloop/segmentation.py` (full), `scripts/eval_seg.py`, `scripts/eval_pipeline.py`, `tests/test_segmentation_gpu.py`
 **Steps:**
@@ -243,7 +243,7 @@ TWINLOOP_NNUNET_TRAINER=nnUNetTrainer_5epochs ./scripts/dk pytest -q -m "gpu and
 
 ---
 
-## [ ] T09 — Wait for training to finish
+## [x] T09 — Wait for training to finish
 **Depends on:** T05
 **Steps:**
 1. `docker ps -a --filter name=twinloop-train --format '{{.Status}}'` and `docker logs --tail 30 twinloop-train`.
@@ -258,7 +258,7 @@ TWINLOOP_NNUNET_TRAINER=nnUNetTrainer_5epochs ./scripts/dk pytest -q -m "gpu and
 
 ---
 
-## [ ] T10 — Segmentation evaluation on the test split
+## [x] T10 — Segmentation evaluation on the test split
 **Depends on:** T08, T09
 **Steps:**
 1. Ensure training is not running (`docker ps` shows no `twinloop-train`).
