@@ -779,6 +779,43 @@ samples with diameter ≥ 1.5 mm of `tree_0`/`tree_1` in result.json (empty if a
 (0 for v1 variants). Run the pipeline through `run_pipeline` with `mask` given (no nnU-Net call).
 A failed case gets `status=failed`, the error text, and empty metric cells; it is never dropped.
 
+### 13b. Stenosis error metric and guard (added in S20; supersedes `widened_rate` as a guard)
+
+`widened_rate` is kept in `metrics.stenosis_metrics` (unchanged, for comparison with S16) but is
+not fit for purpose as a guard: GT blurred by σ 0.25 mm (Dice 0.998) already scores 0.28 (S19).
+
+**Radius definition.** The radius written to the tree is the **area-equivalent radius**
+`r_eq = sqrt(A/π)` of the vessel cross-section (the solver's physics depends on lumen area).
+`V2Options.radius_mode ∈ {"inscribed", "area_eq"}`, **DEFAULT "area_eq"**; `v2=None` is the v1
+inscribed radius. `radius.area_eq_radii(graph, mask, spacing)` replaces every branch's `radius_mm`
+by `r_eq` of the final mask from a CPR cross-section (§9 geometry: 48 px, 0.2 mm, 0.5 mm step)
+perpendicular to the local tangent; component containing the slice centre, else the nearest one.
+Lumen refinement (when on) writes `r_eq` itself and is applied after it.
+
+```python
+def stenosis_errors(g_gt, g_pred, lp) -> list[dict]   # one dict per GT lesion (v1 detect_lesions on g_gt)
+def summarize_stenosis(rows) -> dict                  # per severity bin + down50 / down70
+```
+Per GT lesion: take the nearest `g_pred` point to the GT lesion's minimum point. Distance > 2 mm →
+`missed=True`, other fields NaN. Otherwise, on the matched pred branch, the window of points within
+±2 mm arc length of the matched point; `ds_pred = max over the window of (1 − r / r_ref)` with
+`r_ref` = the pred branch's `reference_radius` (the window absorbs small position shifts).
+Fields: `case_id` (caller), `lesion_id`, `ds_gt`, `ds_pred`, `ds_err_pp = 100·(ds_pred − ds_gt)`,
+`rmin_gt`, `rmin_pred` (radius at the window's max-ds point), `rmin_err_mm` (signed, pred − gt),
+`missed`, `bin` by `ds_gt`: mild [0.25, 0.5), moderate [0.5, 0.7), severe [0.7, 1.0]; below 0.25 →
+"sub". `summarize_stenosis`: per bin n, n_missed, mean / median / mean-abs `ds_err_pp`, mean /
+mean-abs `rmin_err_mm`; overall `down50` = #(ds_gt ≥ 0.5, matched, ds_pred < 0.5) with its
+denominator (#(ds_gt ≥ 0.5)); `down70` likewise with 0.7.
+
+**Guard for all FUTURE hypotheses** (replaces any widened_rate criterion): "mean `ds_err_pp` over
+moderate + severe lesions does not decrease by more than 5 pp versus the comparator, and `down50`
+does not increase." GT lesions for scoring are detected on the GT graph built in the same
+`radius_mode` as the row being scored.
+
+**Status of the data.** The 20-case regression set has been seen in S16, S18 and S19: results on it
+are exploratory only. Confirmatory tests need a new, pre-selected, stenosis-enriched case set
+(not chosen in S20).
+
 ---
 
 ## 14. Training (CLUSTER) — experiment section
