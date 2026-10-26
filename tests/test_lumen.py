@@ -70,3 +70,15 @@ def test_window_starts():
     assert _window_starts(128, 128, 96) == [0]
     assert _window_starts(200, 128, 96) == [0, 72]
     assert _window_starts(300, 128, 96) == [0, 96, 172]
+
+
+def test_predict_logits_accepts_bfloat16_output():
+    from twinloop.config_v2 import V2Params
+    from twinloop.lumen import _predict_logits
+
+    class Bf16Net(nn.Module):
+        def forward(self, x):
+            return torch.zeros_like(x, dtype=torch.bfloat16)
+
+    out = _predict_logits(Bf16Net(), np.zeros((10, 48, 48), np.float32), V2Params().cpr, "cpu")
+    assert out.shape == (10, 48, 48)

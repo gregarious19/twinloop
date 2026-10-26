@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from twinloop.paths import case_image_path, data_root, v2_dir
+from twinloop.paths import case_image_path, v2_dir
 from twinloop.v2split import load_roles
 
 REPO = Path(__file__).resolve().parents[1]

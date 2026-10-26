@@ -32,7 +32,7 @@ def _predict_logits(model, x: np.ndarray, cp: CprParams, device: str) -> np.ndar
     with torch.no_grad():
         for s in _window_starts(n, cp.window_slices, cp.window_stride):
             inp = torch.from_numpy(x[s : s + size])[None, :, None].float().to(device)
-            out = model(inp)[0, :, 0].cpu().numpy()
+            out = model(inp)[0, :, 0].float().cpu().numpy()
             total[s : s + size] += out
             count[s : s + size] += 1.0
     return total / count[:, None, None]

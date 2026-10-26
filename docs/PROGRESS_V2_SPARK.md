@@ -191,3 +191,6 @@ Seeds 0/1/2 best val new-voxel Dice 0.7856 / 0.7853 / 0.7893 (all 40000 steps, n
 - C05: `twinloop-v2-train-lumen` (chain_train.sh) started 15:01 IST, seed 0 at ~0.63 s/step (est. ~5 h/seed, ~16 h for 3 seeds; first estimate). Kill check at step 7500. Unblocked after it: C07 → S15 → C08 → S16. Do not `docker stop` or unpause-pause the chain container carelessly: the script waits on it and moves to the next seed on exit.
 - Stale: S13/S14 done; predictions in /data/v2/firstpass complete (160).
 - WAITING ON OWNER: create a private git remote and push branch v2 (I never push).
+
+### C05 lumen crash fixed (2026-10-26 ~15:45 IST)
+First lumen run died at the step-2000 validation: `TypeError: Got unsupported ScalarType BFloat16` in `lumen._predict_logits` (autocast output .numpy()). Fix: `.float()` before `.cpu().numpy()` (src/twinloop/lumen.py), regression test `test_predict_logits_accepts_bfloat16_output`; also removed an unused import in scripts/predict_firstpass.py. 131 passed, ruff clean. Relaunched `twinloop-v2-train-lumen` (seeds 0-2, skips seeds with metrics.json; the old chain_train.sh is finished, nothing else waits on it). Everything runs on SPARK for now (owner decision), so C07 etc. run here too. Check validation passed: `docker logs --tail 5 twinloop-v2-train-lumen` after step 2000.
