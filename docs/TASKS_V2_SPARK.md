@@ -337,3 +337,18 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 **Acceptance:** both CSVs hold all 20 cases (failures kept with an error column); report has no empty cells; ruff check + format check on `scripts/diag_v2.py` and `pytest -q` pass.
 **Verify:** `./scripts/dk python -c "import pandas as pd; a=pd.read_csv('reports/v2_diag_points.csv'); b=pd.read_csv('reports/v2_diag_lumen.csv'); print(a.case_id.nunique(), len(a), b.groupby('input').size().to_dict())"`
+
+---
+
+## [x] S19 — Radius-definition check and widened-rate calibration
+**Depends on:** S18. **Analysis only:** no retraining; no change to any model, library code, parameter, threshold or default; `reports/V2_RESULTS.md`, `reports/v2_eval.csv` and the S18 files are not edited.
+**Cases:** the 20 cases of `reports/v2_regression_set.json`; same first-pass masks as S16/S18.
+**Files:** `scripts/diag_v2b.py` (new), `reports/v2_diag2.md`, `reports/v2_diag2_radius.csv`, `reports/v2_diag2_calib.csv`.
+**Steps:**
+1. State in the report which radius the lumen net is trained on and which `refine_radii` writes (file:line).
+2. **C1:** at every GT centerline point (S18 filter) compute `r_ins` (pipeline/EDT), `r_eq` (area-equivalent from the GT mask CPR cross-section, same geometry as the lumen model), `ecc = r_eq / r_ins`; rerun the lumen model on GT and predicted centerlines and record `r_lumen` at GT lesion minima; report the like-for-like lumen error against `r_eq`. H-def holds if the GT-centerline error is ≲ 0.2 mm.
+3. **C2:** score the GT mask Gaussian-blurred at σ ∈ {0.25, 0.5, 0.75, 1.0} mm (v1 pipeline path, no repair/lumen) against `g_gt` with the S16 metrics, plus `pred_v1` as reference; widened rate split by GT lesion severity ds bins [0.25,0.5), [0.5,0.7), [0.7,1.0].
+4. Write `reports/v2_diag2.md` (tables, verdicts, ≤ 3 suggested fixes not implemented, caveats), log choices in DECISIONS_V2.md, paste the verify output in PROGRESS_V2_SPARK.md, commit `S19: radius definition and widened-rate calibration`; do not push (`WAITING ON OWNER: git push origin v2`).
+
+**Acceptance:** both CSVs cover all 20 cases (failures kept with an error column); no empty report cells; ruff check/format check on `scripts/diag_v2b.py` and `pytest -q` pass.
+**Verify:** `./scripts/dk python -c "import pandas as pd; a=pd.read_csv('reports/v2_diag2_radius.csv'); b=pd.read_csv('reports/v2_diag2_calib.csv'); print(a.case_id.nunique(), len(a), b.groupby('source').size().to_dict())"`

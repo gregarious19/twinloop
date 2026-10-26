@@ -219,3 +219,8 @@ reports/v2_eval.csv: 100 rows, all ok. H1 FALSIFIED (branch recall −0.010), H2
 Verify output: `20 23281 {'gt': 20, 'gt_shift0.5': 20, 'gt_shift1.0': 20, 'pred': 20, 'pred_nolumen': 20}`
 Findings (reports/v2_diagnostics.md): healthy-point radius bias of pred_v1 +0.029 mm vs +0.415 mm at GT lesions (mask not wider everywhere, only at narrowings; lesion points also miss more: 18 % no pred point within 2 mm). Lumen on GT centerlines: r_min err 0.797 mm (not 0.1-0.2), worse than no lumen (0.556); offset 0.5/1.0 mm -> 0.861/0.958. Centerline mismatch is not the main cause; error is a positive radius bias (possibly radius-definition mismatch r_eq vs EDT, untested). Nothing retrained or changed.
 (pushed to origin/v2 on owner request)
+
+### S19 — Radius definition and widened-rate calibration (2026-10-26)
+Verify output: `20 23281 {'gt_s0.25': 20, 'gt_s0.5': 20, 'gt_s0.75': 20, 'gt_s1.0': 20, 'pred_v1': 20}`
+Findings (reports/v2_diag2.md): H-def partly true: area-equivalent radius exceeds inscribed by +0.25 mm at lesion minima (+0.31 healthy); like-for-like lumen error on GT centerlines still 0.51 mm (needs <= 0.2), so ~58 % of the 0.91 mm signed error is the definition mismatch, the rest a real overestimate at stenoses. Widened rate: GT blurred sigma 0.25-1.0 mm gives 0.28-0.65 vs pred_v1 0.90 (Dice-matched sigma 1.0 -> 0.649); even sigma 0.25 (Dice 0.998) widens 28 %. Severe lesions (n=4) widened equally by pred_v1 and smoothed GT. Nothing retrained or changed.
+WAITING ON OWNER: git push origin v2
