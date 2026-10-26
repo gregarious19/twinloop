@@ -367,3 +367,17 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 
 **Acceptance:** `./scripts/dk pytest -q` and `ruff check . && ruff format --check .` pass; both CSVs cover all 20 cases for every source/mode row (failures kept with an error); `v2b_results.md` has no empty cells.
 **Verify:** `./scripts/dk python -c "import pandas as pd; c=pd.read_csv('reports/v2b_cases.csv'); l=pd.read_csv('reports/v2b_lesions.csv'); print(c.groupby(['source','radius_mode']).status.value_counts().to_dict()); print(l.groupby(['source','radius_mode']).size().to_dict())"`
+
+---
+
+## [x] S21 — Pre-registration, stenosis test set, default revert (commit BEFORE any training)
+**Depends on:** S20. No training. `reports/V2_RESULTS.md`, `v2_eval.csv`, `v2_diagnostics.md`, `v2_diag2*`, `v2b_*` are not edited.
+**Files:** `src/twinloop/pipeline.py` (default), `scripts/make_stenosis_set.py` (new), `reports/v3_stenosis_set.json`, `docs/SPEC_V2.md` §13c.
+**Steps:**
+1. `V2Options.radius_mode` default back to `"inscribed"` (area_eq artefact, S20 §2; CLI default too). All tests pass.
+2. `reports/v3_stenosis_set.json`, GT only: pool = v2_holdout + v2_realfail minus the 20 regression cases; score = number of GT lesions (inscribed, v1 `detect_lesions`) with ds ≥ 0.5; 30 highest (ties: more lesions with ds ≥ 0.7, then lower case id); each must have a first-pass mask, else take the next. JSON `{"case_ids", "rule", "lesions_per_bin"}`. Never edited later.
+3. SPEC_V2 §13c "Hypothesis H3 (lumen v3)" (primary, guards, verdict rule, secondary).
+4. Commit `S21: H3 pre-registration, stenosis test set, radius default inscribed`.
+
+**Acceptance:** JSON has 30 ids, none in the regression set or test split; §13c committed; pytest and ruff pass.
+**Verify:** print the 30 ids and `lesions_per_bin`; paste in PROGRESS.

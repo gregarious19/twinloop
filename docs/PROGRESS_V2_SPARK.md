@@ -235,3 +235,12 @@ Tests: `pytest -q` 136 passed; ruff check + format clean. Sanity: pred_v1/inscri
 Findings (reports/v2b_results.md, exploratory, no verdicts): pred_v1 moderate+severe mean ds_err_pp -24.1 (area_eq) vs -51.2 (inscribed); lumen -26.6, repair -26.1, repair+lumen -28.0; gt_blur0.5 floor -13.2. Area_eq gives 160 GT lesions vs 86 inscribed (mild 48 -> 144, cause not investigated), so bins are not comparable across modes. Radius switch raises min FFR (gt mean +0.098, pred_v1 +0.037); 4 (gt) and 2 (pred_v1) cases cross 0.80 upward, 0 downward. Defaults: radius_mode now "area_eq" (owner decision); repair/lumen unchanged. See D-V2-S20.
 (pushed to origin/v2 on owner request)
 
+
+### S21 — H3 pre-registration, stenosis set, default revert (2026-10-27)
+Docker needs `sg docker -c "./scripts/dk ..."` in this shell (user not in the docker group of the login session).
+`pytest -q` 136 passed; ruff check + format clean.
+```
+case_ids: [187, 791, 249, 983, 546, 1, 147, 989, 181, 336, 351, 469, 486, 842, 196, 211, 597, 699, 969, 403, 163, 167, 578, 907, 934, 938, 169, 246, 247, 376]
+lesions_per_bin: {'mild': 53, 'moderate': 71, 'severe': 19}
+```
+Rule and §13c are in reports/v3_stenosis_set.json and docs/SPEC_V2.md.

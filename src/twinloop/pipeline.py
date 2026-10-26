@@ -58,7 +58,7 @@ class V2Options:
     lumen: bool = False
     flow_mode: str = "auto"
     decider: str = "learned"  # "learned" | "rules" (rules: RulesDecider, used by the evaluation)
-    radius_mode: Literal["inscribed", "area_eq"] = "area_eq"  # SPEC_V2 §13b
+    radius_mode: Literal["inscribed", "area_eq"] = "inscribed"  # SPEC_V2 §13b
 
 
 def _empty_anatomy(message: str) -> Anatomy:
@@ -345,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-anatomy", action="store_true")
     ap.add_argument("--repair", action="store_true")
     ap.add_argument("--lumen", action="store_true")
-    ap.add_argument("--radius-mode", choices=["inscribed", "area_eq"], default="area_eq")
+    ap.add_argument("--radius-mode", choices=["inscribed", "area_eq"], default="inscribed")
     ap.add_argument("--flow-mode", choices=V2_DEFAULT_FLOW_MODES, default="auto")
     args = ap.parse_args(argv)
 

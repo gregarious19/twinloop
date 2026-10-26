@@ -818,6 +818,31 @@ does not increase." GT lesions for scoring are detected on the GT graph built in
 are exploratory only. Confirmatory tests need a new, pre-selected, stenosis-enriched case set
 (not chosen in S20).
 
+### 13c. Hypothesis H3 (lumen v3) — pre-registered in S21, evaluated ONCE in S24
+
+**Case set:** the 30 cases of `reports/v3_stenosis_set.json` (chosen from GT only by the rule stored
+in that file; disjoint from the 20-case regression set and from the test split; never edited).
+**Setup:** all radii inscribed (`radius_mode="inscribed"`), no repair, no anatomy, flow = v1
+diameter law (`V2Options(anatomy=False, flow_mode="diameter_law")`). GT lesions are detected on the
+GT graph built the same way (§13b `stenosis_errors`).
+
+- Comparator `pred_v1`: first-pass mask, v1 pipeline. Treatment `pred_lumen3`: first-pass mask,
+  lumen v3 refinement with the inference settings (`radius_out`, `fallback`, `sigma`) frozen in S23.
+- **PRIMARY:** mean `ds_err_pp` over moderate + severe GT lesions is at least 10 pp less negative
+  for `pred_lumen3` than for `pred_v1`.
+- **GUARDS:** (a) `down50` does not increase; (b) false significant lesions do not increase by more
+  than 5 over the 30 cases; (c) mean `|ds_err_pp|` in the mild bin does not increase by more than 5 pp.
+- **SUPPORTED** only if the primary criterion and all guards hold; otherwise **FALSIFIED**.
+- **Secondary (report only, no verdict):** per-case minimum FFR versus `gt_v1`; how many cases with
+  `gt_v1` min FFR < 0.80 each variant also calls < 0.80; false calls (variant < 0.80 where `gt_v1` >= 0.80).
+
+New metric `false_sig_lesions(g_gt, g_pred, lp) -> int` (`metrics.py`, S24): the number of predicted
+lesions (v1 `detect_lesions` on `g_pred`) with `ds >= 0.5` whose minimum point has no GT lesion
+(any `ds >= 0.25`, minimum point of a lesion detected on `g_gt`) within 5 mm.
+
+Extra reference rows (no verdict): `pred_lumen_old` (deployed `lumen` model, old settings) and
+`gt_lumen3` (GT mask + lumen v3 on GT centerlines: oracle for perfect centerlines).
+
 ---
 
 ## 14. Training (CLUSTER) — experiment section

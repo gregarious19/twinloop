@@ -1,0 +1,40 @@
+{
+ "case_ids": [
+  187,
+  791,
+  249,
+  983,
+  546,
+  1,
+  147,
+  989,
+  181,
+  336,
+  351,
+  469,
+  486,
+  842,
+  196,
+  211,
+  597,
+  699,
+  969,
+  403,
+  163,
+  167,
+  578,
+  907,
+  934,
+  938,
+  169,
+  246,
+  247,
+  376
+ ],
+ "rule": "Pool = all v2_holdout and v2_realfail cases minus the 20 cases of reports/v2_regression_set.json. For each pool case, build the GT graph (inscribed radii, v1 path) and run v1 detect_lesions; score = number of GT lesions with ds >= 0.5. Take the 30 highest scores (ties: more lesions with ds >= 0.7, then lower case id), skipping any case without a first-pass mask (S16 location). Uses GT only: no predictions or model outputs.",
+ "lesions_per_bin": {
+  "mild": 53,
+  "moderate": 71,
+  "severe": 19
+ }
+}
