@@ -200,3 +200,12 @@ First lumen run died at the step-2000 validation: `TypeError: Got unsupported Sc
 - C07: `train/export_models.py` -> `~/twinloop-data/models/v2/{gapfill,lumen,decider}`; deployed gapfill seed 2 (0.7893), lumen seed 2 (0.1249 mm), decider seed 1 (macro-F1 0.6381). Loading checks pass. `reports/v2_training.md` written.
 - C08: `train/finetune_decider.py`; 5-fold grouped CV on real rows macro-F1 0.435 ± 0.055 (synthetic-only on all real rows 0.310). `decider_synth_only/` kept. See report section.
 - Everything ran on SPARK by owner decision; no rsync needed.
+
+### S15 — Models integrated (2026-10-26)
+`load_model` loads gapfill (GapfillNet), lumen (LumenNet), decider (FullProba). sklearn 1.9.1 in container = `sklearn_version` in decider config. CLI `--repair --lumen`:
+```
+OK case_id=s15_2 trees=2 lesions=4 min_ffr=0.978 total_s=92.4   (v2_train 2, GT mask)  n_actions=6  review_flags=15
+OK case_id=s15_3 trees=2 lesions=7 min_ffr=0.989 total_s=72.0   (v2_train 3, GT mask)  n_actions=6  review_flags=16
+OK case_id=s15_1 trees=2 lesions=5 min_ffr=0.980 total_s=80.5   (v2_realfail 1, first-pass mask)  n_actions=37  review_flags=16
+```
+Timings (s): anatomy 71/51/52, repair 10/10/18, lumen 0.7/0.6/0.6. All < 300 s. Observations (not tuned): lumen step takes <1 s, so I have not verified it changes radii; repair on GT masks still proposes extend/stop actions (GT vessels end at r~1 mm, see S04 notes). FFR values unvalidated.

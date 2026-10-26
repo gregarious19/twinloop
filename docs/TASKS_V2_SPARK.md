@@ -271,7 +271,7 @@ nnU-Net, model inference) check `free -g`; if the "available" column is < 20, wa
 
 ---
 
-## [ ] S15 — Integrate trained models
+## [x] S15 — Integrate trained models
 **Depends on:** S12; CLUSTER C07 finished and the owner has synced `models/v2/` and pulled `nets.py`
 **Steps:**
 1. `ls ${TWINLOOP_DATA:-$HOME/twinloop-data}/models/v2/*/config.json` must list `gapfill`, `lumen`, `decider`. Otherwise WAITING ON OWNER (rsync from SPEC §1).
