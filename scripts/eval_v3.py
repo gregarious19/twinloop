@@ -62,6 +62,11 @@ PARTS = v2_dir() / "eval_v3" / "parts"
 CASES = json.loads((REPO / "reports/v3_stenosis_set.json").read_text())["case_ids"]
 
 
+def _fallback(result: dict):
+    v = (result.get("v2") or {}).get("lumen_fallback_fraction")
+    return "" if v is None else v
+
+
 def eval_row(cid, source, image, gt, g_gt) -> tuple[dict, list[dict]]:
     mkind, v2 = SOURCES[source]
     row = dict.fromkeys(CASE_COLS, "")
@@ -85,7 +90,7 @@ def eval_row(cid, source, image, gt, g_gt) -> tuple[dict, list[dict]]:
             n_lesions_gt=len(rows), false_sig=metrics.false_sig_lesions(g_gt, g_res, LP),
             min_ffr_tree0=f0, min_ffr_tree1=f1,
             min_ffr=min([f for f in (f0, f1) if f is not None], default=""),
-            fallback_fraction=(result.get("v2") or {}).get("lumen_fallback_fraction") or "",
+            fallback_fraction=_fallback(result),
             status="ok",
         )  # fmt: skip
     except Exception as exc:  # a failed row is recorded, never dropped
@@ -134,6 +139,12 @@ def merge() -> None:
                             ("lesions", LESION_COLS, "v3_lesions.csv")):  # fmt: skip
         df = pd.concat([pd.read_csv(p) for p in sorted(PARTS.glob(f"{kind}_*of*.csv"))])
         df = df.sort_values(["source", "case_id"], kind="stable")
+        if kind == "cases":  # S24 fix: 0.0 had been written as "" (reporting only); backfill
+            for i, r in df.iterrows():
+                f = v2_dir() / "eval_v3" / r.source / f"{int(r.case_id):04d}" / "result.json"
+                if r.status == "ok" and f.exists():
+                    v = _fallback(json.loads(f.read_text()))
+                    df.at[i, "fallback_fraction"] = np.nan if v == "" else v
         df[cols].to_csv(REPO / "reports" / out, index=False)
         print(out, len(df))
 

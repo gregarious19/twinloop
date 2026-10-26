@@ -410,3 +410,12 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 4. Commit `S22: area_eq junction exclusion`.
 
 **Acceptance:** tests + ruff pass; report has no empty cells.
+
+---
+
+## [x] S24 — H3 evaluation (once)
+**Depends on:** S21, S23. Run once on the 30 cases of `reports/v3_stenosis_set.json`; nothing is changed after seeing results. Sources `gt_v1`, `pred_v1`, `pred_lumen_old`, `pred_lumen3` (frozen settings), `gt_lumen3` (oracle); inscribed radii, no repair, no anatomy, diameter-law flow.
+**Files:** `src/twinloop/metrics.py` (`false_sig_lesions` + phantom test), `scripts/eval_v3.py`, `reports/v3_lesions.csv`, `reports/v3_cases.csv`, `reports/H3_RESULTS.md`.
+**Steps:** run (3 shards), merge, report with the SPEC §13c verdict and secondary FFR table; if SUPPORTED set `V2Options` defaults `lumen_model="lumen_v3"` and the frozen refine options (lumen stays off), else change no default; log; commit `S24: H3 lumen v3 evaluation`; no push (`WAITING ON OWNER: git push origin v2`).
+**Acceptance:** every (case, source) row present (failures kept with error), no empty cells in H3_RESULTS.md; pytest + ruff pass.
+**Verify:** `./scripts/dk python -c "import pandas as pd; c=pd.read_csv('reports/v3_cases.csv'); print(c.groupby('source').status.value_counts().to_dict())"`

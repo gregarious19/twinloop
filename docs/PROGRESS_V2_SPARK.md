@@ -256,3 +256,8 @@ Verify (reports/v3_area_eq_fix.md, 50 first v2_train ids, GT masks): lesions mil
 
 ### S23 — Lumen v3 (2026-10-27)
 3 seeds finished, none killed: moderate+ r_ins validation error 0.415 / 0.425 / 0.408 mm (old model 0.453); seed 2 exported as `lumen_v3`. Frozen settings: radius_out=ins, fallback=interp, sigma=0 (grid: reports/v3_lumen_freeze_grid.csv; moderate+ error at GT lesion minima still ~1.09 mm, all over-estimates). Reports: reports/v3_lumen_training.md, reports/v2_training.md ("Lumen v3"). Container `twinloop-v2-train-lumen3` has exited; no job is running.
+
+### S24 — H3 lumen v3 evaluation (2026-10-27)
+Verify output: `{('gt_lumen3','ok'): 30, ('gt_v1','ok'): 30, ('pred_lumen3','ok'): 30, ('pred_lumen_old','ok'): 30, ('pred_v1','ok'): 30}`
+**H3 FALSIFIED** (reports/H3_RESULTS.md): primary +1.6 pp (need ≥ +10); down50 62 vs 61 (guard fails); false_sig 9 vs 14 and mild |err| 20.1 vs 22.5 (guards hold). Secondary: of 16 cases with gt_v1 min FFR < 0.80, pred_v1 / pred_lumen_old / pred_lumen3 call 0 of 16, gt_lumen3 5 of 16. No default changed. FFR unvalidated.
+WAITING ON OWNER: git push origin v2
