@@ -1,91 +1,85 @@
-# TwinLoop — CLAUDE.md
+# TwinLoop — CLAUDE.md (v3)
 
 ## Mission
-TwinLoop is a research prototype that estimates CT-FFR from a coronary CT angiography scan: nnU-Net
-segments the coronary arteries, centerlines and radii feed a steady 1D blood-flow model, and a local
-web app shows the coronary tree coloured by FFR. It aims to be a cheap, fast alternative to HeartFlow
-for Indian hospitals. FFR values are unvalidated (no invasive-FFR data) and are never presented as
-accurate. **v1** (docs/SPEC.md, docs/TASKS.md) builds the base pipeline. **v2** (docs/SPEC_V2.md)
-adds TotalSegmentator anatomy (aorta, myocardium), a segmentation repair loop (decider + gap-filler),
-CPR-based lumen refinement and myocardial-mass flow.
+TwinLoop estimates CT-FFR from a coronary CT angiography (CCTA) scan: nnU-Net segments the coronary
+arteries, centerlines and radii feed a steady 1D blood-flow model. FFR values are unvalidated (no
+invasive-FFR data) and are never presented as accurate. v2 is finished; its three hypotheses
+(H1, H2, H3) were all falsified. The first-pass pipeline flags 0 of 16 cases whose ground-truth (GT)
+mask gives min FFR < 0.80, but a σ 0.5 mm blur of the GT mask (Dice 0.956) loses its stenoses almost
+as badly, so the GT stenosis "ruler" itself is in doubt.
+**v3** first audits that ruler (Phase A), then, only if two gates pass, tests three fixes against
+one pre-registered hypothesis H4 (Phase B). If a gate fails, it researches external data (Phase C).
+Full design: docs/SPEC_V3.md. Tasks: docs/TASKS_V3.md.
 
-**Done (v2)** = every task in your machine's task file is `[x]` (or `[x] skipped` where allowed) with
-verification output in your progress file; all tests and ruff pass; reports/V2_RESULTS.md is filled.
+**Done (v3)** = every task in docs/TASKS_V3.md is `[x]` (or `[x] skipped (<reason>)` where a gate
+or condition says so) with verification output in docs/PROGRESS_V3.md; `./scripts/dk pytest -q` and
+both ruff commands pass; the final report the gates lead to is written (reports/V3_RESULTS.md, or
+reports/v3_external_data.md when a gate failed).
 
-## Where v2 lives
-v2 is developed on git branch `v2` in a **separate worktree folder** (e.g. `~/twinloop-v2`) of the
-same repo. The original folder (e.g. `~/twinloop`, branch `main`) belongs to a separate v1 Claude
-session that finishes v1 (training, API, UI, evaluation). Never `cd` into, edit, commit in, or check
-out branches in the v1 folder; never run `git checkout`/`git switch` here. You may read `main`
-(`git log main`, `git show main:docs/PROGRESS.md`). v1 code reaches `v2` only through the merge
-task in docs/TASKS_V2_SPARK.md. The v2 Docker image tag is `twinloop:v2` (v1 keeps `twinloop:dev`).
+## Where v3 lives
+Branch `v3` in the worktree folder `twinloop-v3` (sibling of `twinloop-v2`). SPARK only (DGX
+Spark, `uname -m` = `aarch64`); there is no CLUSTER work in v3. Never `cd` into, edit or commit in
+the `twinloop-v2` or `twinloop` (v1, branch `main`) folders. Never run `git checkout`/`git switch`.
+You may read other branches (`git show v2:<path>`, `git log v2`).
 
-## Which machine am I on? (decide first, every session)
-| `uname -m` | Machine | Work from | Log progress in | Log decisions in |
-|---|---|---|---|---|
-| `aarch64` | SPARK (DGX Spark, Docker) | docs/TASKS_V2_SPARK.md | docs/PROGRESS_V2_SPARK.md | docs/DECISIONS_V2.md |
-| `x86_64` with `sbatch` | CLUSTER (Slurm, 80 GB GPU) | docs/TASKS_V2_CLUSTER.md | docs/PROGRESS_CLUSTER.md | docs/DECISIONS_CLUSTER.md |
-Edit only files your machine owns (SPEC_V2 §1 table). CLUSTER owns `src/twinloop/nets.py`,
-`train/`, `cluster/`, `tests/test_nets.py`, `requirements-cluster.txt`, its progress/decisions files and
-`reports/v2_training.md`; SPARK owns everything else.
+## Stack (unchanged from v2; no new dependencies in v3)
+Docker image `twinloop:v2` (base `nvcr.io/nvidia/pytorch:26.09-py3`, Python 3.12, torch
+2.14.0a0 NGC build, nnU-Net 2.8.1, TotalSegmentator 2.18.0, SimpleITK 2.5.6, scikit-image 0.26.0,
+scipy 1.18.1, networkx 3.6.1, pandas 3.0.5, scikit-learn 1.9.1, joblib, pyarrow, pydantic 2.13.5).
+Pins: requirements.txt / requirements.lock. Do not rebuild the image. pytest, ruff (line length 100).
 
-## Stack
-- SPARK: base image `nvcr.io/nvidia/pytorch:<tag>-py3` (tag in docs/DECISIONS.md D25); nnU-Net v2,
-  TotalSegmentator, SimpleITK, scikit-image, scipy, networkx, pandas, pyarrow, scikit-learn, joblib,
-  pydantic v2, FastAPI, three.js 0.160.0 (vendored); pins in requirements.txt / requirements.lock.
-- CLUSTER: venv (Python minor = SPARK's), torch 2.5.1 (CUDA wheel), pins in requirements-cluster.txt
-  generated from requirements.lock; scikit-learn version must equal SPARK's.
-- pytest, ruff (line length 100) on both.
-
-## Commands
-SPARK (host, repo root; `./scripts/dk` runs inside the container, data at `/data`):
+## Commands (host, repo root of `twinloop-v3`; `./scripts/dk` runs inside the container, data at `/data`)
+If `docker ps` says "permission denied", prefix every docker-using command with `sg docker -c "..."`.
 ```
-docker build -t twinloop:v2 .
-./scripts/dk pytest -q                       # CPU tests (excludes gpu/data markers)
-./scripts/dk pytest -q -m "gpu and data"     # GPU + data tests
+./scripts/dk pytest -q                               # CPU tests (excludes gpu/data markers)
+./scripts/dk pytest -q -m "gpu and data"             # GPU + data tests
 ./scripts/dk ruff check . && ./scripts/dk ruff format --check .
-./scripts/dk python -m twinloop.pipeline --image /data/... [--mask /data/...] [--repair] [--lumen]
-bash scripts/run_server.sh                   # web app on http://127.0.0.1:8000
-docker ps -a --filter name=twinloop          # background jobs (twinloop-train = first-pass training)
-free -g                                      # check before any GPU run: need >= 20 GB available
-```
-CLUSTER (login node, repo root):
-```
-source cluster/cluster.env && source $VENV/bin/activate
-python -m pytest -q tests/test_nets.py       # only short CPU tests on the login node
-ruff check train src/twinloop/nets.py tests/test_nets.py && ruff format --check train src/twinloop/nets.py tests/test_nets.py
-cluster/submit.sh gpu|cpu [sbatch flags] <job script> [args]   # every real job goes through Slurm
-squeue -u $USER ; sacct -j <id> --format=JobID,JobName,State,Elapsed,ExitCode -X
+./scripts/dk python scripts/<script>.py [args]       # every v3 script runs this way
+./scripts/dkd <container-name> <command>             # detached long job (survives the session)
+docker ps -a --filter name=twinloop                  # background jobs
+docker logs --tail 20 <container-name>               # job progress
+nvidia-smi ; free -g                                 # before any GPU job: >= 20 GB RAM available
 ```
 
 ## Repo map
-- `src/twinloop/` — v1: config, io, phantom, segmentation, centerline, lesions, solver, schema,
-  casefiles, pipeline. v2: paths, config_v2, v2split, graph, anatomy, damage, regions, cpr, gapfill,
-  lumen, repair, flow, modelio, metrics; nets (CLUSTER-owned).
-- `app/` — FastAPI server, job runner, static web UI. `scripts/` — docker helpers, data, eval, v2
-  scripts. `train/` — CLUSTER dataset generators and training scripts. `cluster/` — Slurm setup.
-- `tests/` — pytest (phantoms; `gpu`/`data` markers for real data). `reports/` — results (committed).
-- `docs/` — SPEC, SPEC_V2, TASKS, TASKS_V2_SPARK, TASKS_V2_CLUSTER, DECISIONS*, PROGRESS*.
+- `src/twinloop/` — pipeline library (v1 + v2 modules). v3 adds `radius_smooth.py`, `halfmax.py`
+  and `paths.v3_dir()`; v3 adds two `V2Options` fields (`radius_smooth_mm`, `halfmax`).
+- `scripts/` — v3 scripts are named `v3_*.py` / `eval_v3.py` (list in SPEC_V3 §12).
+- `train/` — v2 training scripts (read and run; do not edit). `tests/` — pytest.
+- `reports/` — committed results (Markdown, JSON, CSV < 2 MB). Large CSVs go to `/data/v3/`.
+- `docs/` — SPEC_V3, TASKS_V3, DECISIONS_V3, PROGRESS_V3 (yours); SPEC_V2 and older files are
+  background only, never edited.
+- Data: `/data/nnUNet_raw/Dataset501_ImageCAS/` (images, GT labels), `/data/v2/` (v2 outputs,
+  first-pass masks in `/data/v2/firstpass/`), `/data/models/v2/` (deployed models), `/data/v3/`
+  (everything v3 writes).
 
 ## Hard rules
-- Never use ImageCAS test-split cases (`case_id % 5 == 0`) in v2. v1 uses them only in v1 T10–T12.
-  Never tune any parameter, threshold, model or epoch count on test, `v2_holdout` or `v2_realfail`
-  cases (SPEC_V2 §2.2). Report all results honestly, including failures and killed runs.
-- Never stop, restart or `docker rm` the `twinloop-train` container while it runs.
-- Never delete or modify `/data/raw/`. Never commit data, weights, `.nii*`, `.npz`, `.parquet`, `.zip`.
-- Never print, read, copy or commit secrets: `~/.kaggle/access_token`, the NGC key, the TotalSegmentator
-  licence key or `/data/totalseg/config.json` (existence checks only).
-- Never change v1 `result.json` fields, API routes, status names or error strings. Optional new fields
-  only if logged in your decisions file (v2 adds exactly one: `v2`).
-- Never add a dependency without pinning it (requirements.txt on SPARK, requirements-cluster.txt on
-  CLUSTER) and logging it.
-- Never bind the server to anything but 127.0.0.1. Never write any claim of clinical accuracy; the
-  v1 disclaimer string stays on every result and screen.
-- Never `git push`, never copy data between machines: write `WAITING ON OWNER: <exact command>` in
-  your progress file and continue with the next independent task.
-- Commit locally after each finished task with the exact prefix: `git commit -m "S<nn>: <title>"`
-  (SPARK v2) or `"C<nn>: <title>"` (CLUSTER), always on branch `v2`.
-- Change parameter defaults only where a task says so; log every change.
+- Never read or use ImageCAS test-split cases (`case_id % 5 == 0`); `paths.case_image_path` raises
+  on them. Never tune any parameter, threshold, model, epoch count or arm choice on `v2_holdout`
+  or `v2_realfail` cases. Phase A uses `v2_train` cases only (plus the 50 already-seen cases in
+  V06, as SPEC_V3 §6.4 states).
+- H4 is evaluated exactly ONCE (task V13). Never rerun it, never change code, settings or the
+  case set after seeing any H4 number. A failed row is recorded, never dropped or retried silently.
+- Report every result honestly, including falsified hypotheses, failed gates, killed runs and
+  crashes. Never describe FFR as accurate or validated; never write "diagnosis".
+- Never delete, overwrite or modify anything under `/data/raw/`, `/data/nnUNet_raw/Dataset501_*`,
+  `/data/nnUNet_preprocessed/Dataset501_*`, `/data/nnUNet_results/`, `/data/v2/`, `/data/models/v2/*`
+  existing folders. Adding new folders (Dataset512, new model folders) is allowed where a task says so.
+- Never stop, restart or `docker rm` a container you did not start in v3 (for example
+  `twinloop-v2-xfit`, `twinloop-train`, `twinloop-server`). Never run two TotalSegmentator jobs at
+  once (v3 does not need TotalSegmentator: always `anatomy=False`).
+- One GPU job at a time. Do not start a GPU job while another container is using the GPU
+  (`nvidia-smi` shows a twinloop process): wait and poll every 30 min (`sleep 1800`).
+- Total GPU budget 96 h for v3. Log each GPU job's wall hours in PROGRESS_V3. Stop launching jobs if
+  the next one would exceed the budget, and write BLOCKED.
+- Never change v1 `result.json` fields, API routes, status names or error strings. New `V2Options`
+  fields default to "off", so every existing output stays identical.
+- No new dependencies. Never commit data, weights, `.nii*`, `.npz`, `.npy`, `.parquet`, `.pth`, `.zip`.
+- Never print, read, copy or commit secrets (`~/.kaggle/access_token`, NGC key, TotalSegmentator
+  licence, `/data/totalseg/config.json`).
+- Never `git push`. Write `WAITING ON OWNER: git push origin v3` in PROGRESS_V3 and continue.
+- Commit locally after each finished task: `git commit -m "V<nn>: <title>"` on branch `v3`.
+- Phase C: research only. No downloads, no account creation, no emails.
 
 ## Working protocol
 - Work one task at a time from docs/TASKS.md, in order.
@@ -94,14 +88,16 @@ squeue -u $USER ; sacct -j <id> --format=JobID,JobName,State,Elapsed,ExitCode -X
 - If the same error survives 3 different fix attempts, stop. Write the error, what you tried, and your best hypothesis into docs/PROGRESS.md under BLOCKED, then move to the next independent task.
 - Never mark a task done without passing verification.
 
-For v2, read the protocol with your machine's files substituted: "docs/TASKS.md" → your task file
-from the table above, "docs/PROGRESS.md" → your progress file, "docs/DECISIONS.md" → your decisions
-file. v1 tasks (docs/TASKS.md) are done by the v1 session in the v1 folder, never by you.
+For v3, read that protocol with these substitutions: "docs/TASKS.md" → docs/TASKS_V3.md,
+"docs/PROGRESS.md" → docs/PROGRESS_V3.md, "docs/DECISIONS.md" → docs/DECISIONS_V3.md
+(the unsuffixed files belong to v1 and are never edited).
+A task whose detached job is still running stays under "In progress"; meanwhile continue with the
+next task whose dependencies are met. Gate tasks (V05, V06) may mark later tasks
+`[x] skipped (G<n> failed)`: that is the only allowed way to skip a task besides the conditions
+written inside a task.
 
 ## Session start checklist
-1. `uname -m` → pick your row in the machine table.
-2. Read your progress file ("In progress", "BLOCKED", "WAITING ON OWNER", "Notes for next session").
-   SPARK also reads docs/PROGRESS_CLUSTER.md "Notes for next session" for bug reports to fix first.
-3. SPARK: `docker ps -a --filter name=twinloop`. CLUSTER: `squeue -u $USER` and `sacct` for job IDs
-   listed in your progress file.
-4. Continue with the first unfinished task whose dependencies are met.
+1. `uname -m` must print `aarch64`; `git branch --show-current` must print `v3`.
+2. Read docs/PROGRESS_V3.md ("In progress", "BLOCKED", "WAITING ON OWNER", "Notes for next session").
+3. `docker ps -a --filter name=twinloop` and check every container listed under "In progress".
+4. Continue with the first unfinished task in docs/TASKS_V3.md whose dependencies are met.
