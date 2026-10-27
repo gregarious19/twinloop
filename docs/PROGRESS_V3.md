@@ -47,6 +47,15 @@ sel modplus lesions per σ_s: 777 / 634 / 284 / 85 / 11 ; survive σ_b 0.5: 0.05
 median iou_ref over all D0 lesions: 0.357; halfmax_usable: False
 ```
 Surprising: even σ_s 2.0 mm leaves almost no modplus lesions and none of those survive a σ_b 0.5 mm blur.
+- [V05] 2026-10-27 — A3 definition selection, Gate G1 = FAIL — verification:
+```
+{"sigma_s_mm": null, "retention": null, "count": null, "count_d0": 777, "image_supported_frac": null,
+ "halfmax_usable": false, "dataset_aligned": false, "g1": "fail",
+ "g1_reason": "no definition has retention >= 0.8 with count >= 0.4 * count(D0) = 311; best retention 0.048 at sigma_s 0 (count 777)"}
+sel retention D0..D4: 0.048 0.038 0.025 0.024 0.000 ; counts 777 634 284 85 11 ; dev: 0.019 0.011 0 0 0
+pytest 156 passed ; ruff clean
+```
+V06–V13 marked `[x] skipped (G1 failed)`; going to V14. No GPU used (0 of 96 h).
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>

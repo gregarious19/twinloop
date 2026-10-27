@@ -85,7 +85,7 @@ three in §6.1; the clean/jit split is shown.
 more → BLOCKED protocol); report shows sel / dev / all tables and the `halfmax_usable` line.
 **Verify:** `./scripts/dk python -c "import pandas as p; d=p.read_csv('/data/v3/audit/lesions.csv'); print(d.case_id.nunique(), (d.status!='ok').sum())"` → `640 <small number>`.
 
-## [ ] V05 — A3: choose the definition, Gate G1
+## [x] V05 — A3: choose the definition, Gate G1
 **Depends on:** V03, V04. **Files:** `scripts/v3_audit_report.py` (`--select`),
 `reports/v3_definition.json`, `reports/v3_A3_definition.md`, DECISIONS_V3.
 **Steps:**
@@ -96,7 +96,7 @@ more → BLOCKED protocol); report shows sel / dev / all tables and the `halfmax
 case it selects on has `id % 10 != 3`); report table covers D0–D4 on sel and dev.
 **Verify:** `cat reports/v3_definition.json`.
 
-## [ ] V06 — eval_v3.py; A4 re-score of the 50 seen cases, Gate G2
+## [x] skipped (G1 failed) V06 — eval_v3.py; A4 re-score of the 50 seen cases, Gate G2
 **Depends on:** V05 (G1 pass). **Files:** `scripts/eval_v3.py`, `scripts/v3_h4_report.py`
 (`--mode a4`), `reports/v3_A4_rescore.md`, `reports/v3_a4_cases.csv`, `reports/v3_a4_lesions.csv`.
 **Steps:**
@@ -115,7 +115,7 @@ case it selects on has `id % 10 != 3`); report table covers D0–D4 on sel and d
 G2 verdict written in the report and in DECISIONS_V3 (`D-V3-V06`).
 **Verify:** `./scripts/dk python scripts/v3_h4_report.py --mode a4 --cases reports/v3_a4_cases.csv --lesions reports/v3_a4_lesions.csv --out reports/v3_A4_rescore.md` and paste the G2 line.
 
-## [ ] V07 — H4 case set and pre-registration (commit BEFORE any Phase B training)
+## [x] skipped (G1 failed) V07 — H4 case set and pre-registration (commit BEFORE any Phase B training)
 **Depends on:** V06 (G2 pass). **Files:** `scripts/v3_make_h4_set.py`, `reports/v3_h4_set.json`,
 `reports/v3_h4_prereg.json`.
 **Steps:**
@@ -133,7 +133,7 @@ G2 verdict written in the report and in DECISIONS_V3 (`D-V3-V06`).
 training has started yet in v3.
 **Verify:** `cat reports/v3_h4_prereg.json`; `git show --stat HEAD`.
 
-## [ ] V08 — Arm 2: half-max narrowing (skip if `arms.arm2` is false)
+## [x] skipped (G1 failed) V08 — Arm 2: half-max narrowing (skip if `arms.arm2` is false)
 **Depends on:** V07. **Files:** `src/twinloop/halfmax.py`, `src/twinloop/pipeline.py`,
 `tests/test_halfmax.py`.
 **Steps:**
@@ -146,7 +146,7 @@ training has started yet in v3.
 **Acceptance:** tests pass; smoke §11 rule (≥ 9/10 ok).
 **Verify:** `./scripts/dk pytest -q tests/test_halfmax.py` and the smoke status counts.
 
-## [ ] V09 — Arm 1: Dataset512 (CPU)
+## [x] skipped (G1 failed) V09 — Arm 1: Dataset512 (CPU)
 **Depends on:** V07. **Files:** `scripts/v3_dataset512.py`.
 **Steps:**
 1. Read `scripts/xfit_setup.py` (how Dataset511 copied plans and symlinked images).
@@ -160,7 +160,7 @@ image (script asserts); preprocessing exits 0; the share of cases with ≥ 1 les
 reported, and if it is below 30 % write BLOCKED (lesion class too rare to matter) and go to V14.
 **Verify:** `ls /data/nnUNet_raw/Dataset512_ImageCASlesion/labelsTr | wc -l` → 640; paste step-4 counts.
 
-## [ ] V10 — Arm 1: sanity run, then 3 replicates (GPU)
+## [x] skipped (G1 failed) V10 — Arm 1: sanity run, then 3 replicates (GPU)
 **Depends on:** V09. **Files:** `scripts/v3_train_arm1.sh`, `reports/v3_arm1_training.md`.
 **Steps:**
 1. Verify §16 rows on `-pretrained_weights` and `nnUNetTrainer_250epochs`; log answers.
@@ -175,7 +175,7 @@ reported, and if it is below 30 % write BLOCKED (lesion class too rare to matter
 **Acceptance:** 3 replicates finished or killed, each documented; GPU hours logged.
 **Verify:** `ls /data/v3/nnunet_results/rep*/Dataset512_ImageCASlesion/*/fold_0/checkpoint_final.pth`; `cat reports/v3_arm1_training.md`.
 
-## [ ] V11 — Arm 3: LumenNet on re-annotated data (GPU; skip if `arms.arm3` is false)
+## [x] skipped (G1 failed) V11 — Arm 3: LumenNet on re-annotated data (GPU; skip if `arms.arm3` is false)
 **Depends on:** V07; GPU free (after V10's chain). **Files:** `reports/v3_arm3_training.md`.
 **Steps:**
 1. If `arms.arm3` is false: mark `[x] skipped (dataset not aligned, V03)` and stop.
@@ -186,7 +186,7 @@ reported, and if it is below 30 % write BLOCKED (lesion class too rare to matter
 **Acceptance:** 3 seeds finished or killed; exported models load; smoke rule met.
 **Verify:** `cat reports/v3_arm3_training.md`.
 
-## [ ] V12 — Arm 1 predictions (GPU)
+## [x] skipped (G1 failed) V12 — Arm 1 predictions (GPU)
 **Depends on:** V10. **Files:** `scripts/v3_predict_arm1.py`.
 **Steps:**
 1. For each non-killed replicate k: predict `dev10` cases and the H4 cases (§9.1 inference) into
@@ -196,7 +196,7 @@ reported, and if it is below 30 % write BLOCKED (lesion class too rare to matter
 **Acceptance:** H4-case mask count = n_cases per non-killed replicate; smoke rule met.
 **Verify:** `ls /data/v3/pred/arm1_rep*/ | wc -l` per folder; smoke summary.
 
-## [ ] V13 — H4 evaluation (ONCE)
+## [x] skipped (G1 failed) V13 — H4 evaluation (ONCE)
 **Depends on:** V08, V11, V12 (each done or skipped). **Files:** `reports/v3_h4_cases.csv`,
 `reports/v3_h4_lesions.csv`, `reports/V3_RESULTS.md`.
 **Steps:**

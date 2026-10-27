@@ -1,0 +1,11 @@
+{
+  "sigma_s_mm": null,
+  "retention": null,
+  "count": null,
+  "count_d0": 777,
+  "image_supported_frac": null,
+  "halfmax_usable": false,
+  "dataset_aligned": false,
+  "g1": "fail",
+  "g1_reason": "no definition has retention >= 0.8 with count >= 0.4 * count(D0) = 311; best retention 0.048 at sigma_s 0 (count 777)"
+}
