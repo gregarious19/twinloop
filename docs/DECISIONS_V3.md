@@ -31,3 +31,7 @@ defaults, 2026-10-27). Append new ones at the end as `D-V3-<task id><letter>` (e
 
 ## Filled in during execution
 <!-- append D-V3-V<nn><letter> entries below -->
+- D-V3-V02a — §16 row 1 resolved: `cpr.straighten(image, mask, branch, cp)` accepts a mask (`straighten_points` resamples it with order 0) and returns it under key `"mask"` (uint8, >0), next to `"img"`, `"s_mm"`, `"points_mm"`. Reason: read src/twinloop/cpr.py.
+- D-V3-V02b — `halfmax.auto_mask` thresholds with strict `sm > thr` instead of the old `>=`. Reason: SPEC §11 requires a blank slice to give an all-False (48,48) array; with `>=` a constant slice has thr == value and selects the whole slice. Differs from the old rule only on exact ties.
+- D-V3-V02c — Audit CSV: a case/σ_s with no GT lesion writes one row with `status=nolesions` (other columns empty); `report` counts cases from non-failed rows. Reason: lesions/case denominators, resumability and the "640 distinct case_ids" check need zero-lesion cases to appear. If a blurred-GT graph cannot be built (no tree), its lesions count as missed / not surviving.
+- D-V3-V02d — SPEC ISSUE: `scripts/eval_v3.py` already exists on this branch (v2 S24, H3 lumen evaluation, commit 196258f; also on branch v2). SPEC_V3 §10 wants a new script of the same name. Proposed fix (applied in V06): replace it with the v3 script; the v2 version stays in git history (196258f) and on branch v2. Not touched in V02.

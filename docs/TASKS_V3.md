@@ -48,7 +48,7 @@ tests and ruff pass; firstpass count 160.
 **Verify:** `./scripts/dk pytest -q tests/test_radius_smooth.py tests/test_pipeline_v3.py` → all
 passed; `./scripts/dk pytest -q` → all passed (count = V00 count + new tests).
 
-## [ ] V02 — Vertical slice: lesion audit on 3 cases
+## [x] V02 — Vertical slice: lesion audit on 3 cases
 **Depends on:** V01. **Files:** `src/twinloop/halfmax.py` (only `auto_mask` now),
 `scripts/v3_lesion_audit.py`, `scripts/v3_audit_report.py`, `tests/test_halfmax.py`.
 **Steps:**

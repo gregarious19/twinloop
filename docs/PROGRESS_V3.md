@@ -22,6 +22,15 @@ pytest -q: 154 passed, 2 deselected (146 + 8 new)
 ruff check: All checks passed ; ruff format --check: 105 files already formatted
 ```
 Note: blur_mask follows SPEC §4.1 (same procedure as diag_v2b.blurred, which uses the identical sigma/threshold).
+- [V02] 2026-10-27 — halfmax.auto_mask (+tests), v3_lesion_audit.py, v3_audit_report.py; slice audit of the 3 lowest v2_train ids (2, 3, 7), σ_s 0 and 1.0 — verification:
+```
+case 2: 2 rows, 12s ; case 3: 6 rows, 12s ; case 7: 6 rows, 12s   (all status=ok, header = §6.2)
+lesion count at σ_s 0: sum(detect_lesions over GT branches) = 8 ; CSV σ_s=0 ok rows = 8
+re-run after ruff reformat: output CSV identical
+slice.md: median iou_ref over all D0 lesions 0.358; halfmax_usable: False (3 cases only, not a verdict)
+pytest -q: 156 passed, 2 deselected (154 + 2 halfmax) ; ruff check / format: clean
+```
+Surprising: image_ds is 0 for most lesions (half-max area at the dip is not smaller than the flank), iou_ref ≈ 0.3–0.45. Both are consistent with the v2 findings; the full audit (V04) decides. Decisions D-V3-V02a–d logged (d = eval_v3.py name clash).
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>
