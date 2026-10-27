@@ -261,3 +261,9 @@ Verify (reports/v3_area_eq_fix.md, 50 first v2_train ids, GT masks): lesions mil
 Verify output: `{('gt_lumen3','ok'): 30, ('gt_v1','ok'): 30, ('pred_lumen3','ok'): 30, ('pred_lumen_old','ok'): 30, ('pred_v1','ok'): 30}`
 **H3 FALSIFIED** (reports/H3_RESULTS.md): primary +1.6 pp (need ≥ +10); down50 62 vs 61 (guard fails); false_sig 9 vs 14 and mild |err| 20.1 vs 22.5 (guards hold). Secondary: of 16 cases with gt_v1 min FFR < 0.80, pred_v1 / pred_lumen_old / pred_lumen3 call 0 of 16, gt_lumen3 5 of 16. No default changed. FFR unvalidated.
 WAITING ON OWNER: git push origin v2
+
+### S25 — extra decider data for add / stop / extend (2026-10-27)
+Thin-vessel bias in the damage generator (default off; `tests/test_damage.py` 9 passed) and `scripts/make_decider_extra.py`. 8-case trial: extend rows median r_local 1.24 mm (before 1.45; real 1.04), hu_lumen 78 (real 74). Full run (640 v2_train cases, 4 workers) writes `/data/v2/datasets/decider_extra/decider_extra.parquet`, log `/tmp/decider_extra.log`; check it finished and record the per-class counts here. See D-V2-S25.
+
+### S26 — cross-fit segmenter runs (2026-10-27)
+`scripts/xfit_setup.py` ran: Dataset511_ImageCASxfit, 640 cases, val sizes 214/213/213. `scripts/xfit_run.py` runs in container `twinloop-v2-xfit` (detached): per fold nnUNetTrainer_100epochs training, then prediction of the held-out third at ep50 and final into `/data/v2/xfit/pred/`. Fold 0 started 06:13 (epoch 0: 203 s incl. compile). Check: `sg docker -c 'docker logs --tail 5 twinloop-v2-xfit'`; ends with `xfit done`. Resumable: rerun `./scripts/dkd twinloop-v2-xfit python -u scripts/xfit_run.py`. Next (not done): scripts that turn the predictions into decider rows (`label_real`) and gap-filler samples, and a check of label quality before any training. See D-V2-S26.

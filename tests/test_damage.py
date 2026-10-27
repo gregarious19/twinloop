@@ -95,3 +95,17 @@ def test_six_damages_do_not_crash():
     g = build_graph(gt, CenterlineParams(), GraphParams())
     _, out, rec = damage_case(img, gt, g, DamageParams(), np.random.default_rng(1))
     assert len(rec) <= 6 and [r.damage_id for r in rec] == [f"d{i}" for i in range(len(rec))]
+
+
+def test_thin_bias_picks_thin_branches():
+    img, gt = make_phantom("two_trees")
+    g = build_graph(gt, CenterlineParams(), GraphParams())
+    radius = {
+        b.branch_id: float(np.median(b.radius_mm)) for t in g.trees for b in t.branches.values()
+    }
+    assert max(radius.values()) > 1.3 > min(radius.values())  # one thick, one thin branch
+    w = tuple(1.0 if t == "truncate" else 0.0 for t in TYPES)
+    dp = replace(DamageParams(), n_damages_per_case=1, type_weights=w, thin_bias_prob=1.0)
+    for seed in range(8):
+        _, _, rec = damage_case(img, gt, g, dp, np.random.default_rng(seed))
+        assert rec and all(radius[r.branch_id] <= 1.3 for r in rec)

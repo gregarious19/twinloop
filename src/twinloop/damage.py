@@ -115,23 +115,34 @@ def damage_case(
         ids = {index_of[b.branch_id]} | {index_of[c] for c in _descendants(t, b.branch_id)}
         return np.isin(v_owner, list(ids)) & v_near
 
-    def try_damage(kind: str):
+    def try_damage(kind: str, thin: bool):
         """One try: returns (record fields, removal selection or None) or None if rejected."""
         pool = eligible(kind == "delete_branch")
         if not pool:
             return None
+        if thin:  # only branches that get thin somewhere; the cut point is checked below
+            ok = [i for i in pool if branches[i][1].radius_mm.min() <= dp.thin_max_radius_mm]
+            pool = ok or pool
         bi = pool[int(rng.integers(len(pool)))]
         _, b = branches[bi]
         length = float(b.s_mm[-1])
+
+        def too_thick(s: float) -> bool:
+            return thin and np.interp(s, b.s_mm, b.radius_mm) > dp.thin_max_radius_mm
+
         if kind == "gap":
             ln = rng.uniform(*dp.gap_len_mm)
             if length - 5.0 - ln < 5.0:
                 return None
             s = rng.uniform(5.0, length - 5.0 - ln)
+            if too_thick(s):
+                return None
             sel = interval(bi, s, s + ln)
             return b, _point_at(b, s), _tangent_at(b, s), ln, sel
         if kind in ("truncate", "occlusion"):
             s = rng.uniform(0.3 * length, 0.8 * length)
+            if too_thick(s):
+                return None
             t_, _ = branches[bi]
             sel = interval(bi, s, length)
             for c in _descendants(t_, b.branch_id):
@@ -178,8 +189,9 @@ def damage_case(
     for _ in range(dp.n_damages_per_case):
         k = int(rng.choice(len(TYPES), p=np.asarray(dp.type_weights)))
         kind = TYPES[k]
+        thin = dp.thin_bias_prob > 0.0 and rng.random() < dp.thin_bias_prob  # once per damage
         for _try in range(MAX_TRIES):
-            res = try_damage(kind)
+            res = try_damage(kind, thin)
             if res is None:
                 continue
             b, seed, direction, ln, sel = res

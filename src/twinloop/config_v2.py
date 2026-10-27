@@ -46,6 +46,11 @@ class DamageParams:
     min_branch_len_mm: float = 15.0
     type_weights: tuple[float, ...] = (0.2, 0.2, 0.15, 0.2, 0.15, 0.1)
     # order: gap, truncate, delete_branch, shrink, false_branch, occlusion
+    # Extra decider data (D-V2-S25): with this probability a gap/truncate/occlusion try is only
+    # accepted where the vessel radius at the cut is <= thin_max_radius_mm (real first-pass
+    # misses are thin). 0 = off; the default draws no extra random number.
+    thin_bias_prob: float = 0.0
+    thin_max_radius_mm: float = 1.3
 
 
 @dataclass(frozen=True)
