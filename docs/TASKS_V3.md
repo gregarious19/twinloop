@@ -212,7 +212,7 @@ reported, and if it is below 30 % write BLOCKED (lesion class too rare to matter
 **Acceptance:** one row per (case, variant); failures listed; verdict per arm and for H4 per §7.
 **Verify:** `grep -n "H4" reports/V3_RESULTS.md | head`.
 
-## [ ] V14 — Phase C (conditional) and wrap-up
+## [x] V14 — Phase C (conditional) and wrap-up
 **Depends on:** V05 or V06 (gate failure), or V13.
 **Files:** `reports/v3_external_data.md`, docs/PROGRESS_V3.md.
 **Steps:**

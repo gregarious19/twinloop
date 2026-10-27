@@ -56,6 +56,11 @@ sel retention D0..D4: 0.048 0.038 0.025 0.024 0.000 ; counts 777 634 284 85 11 ;
 pytest 156 passed ; ruff clean
 ```
 V06–V13 marked `[x] skipped (G1 failed)`; going to V14. No GPU used (0 of 96 h).
+- [V14] 2026-10-27 — Phase C research (G1 failed) and wrap-up — verification:
+```
+reports/v3_external_data.md written (7 candidates, URLs, "not confirmed" where unverified)
+pytest -q: 156 passed, 2 deselected ; ruff check: All checks passed ; ruff format --check: 114 files already formatted
+```
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>
@@ -69,6 +74,8 @@ V06–V13 marked `[x] skipped (G1 failed)`; going to V14. No GPU used (0 of 96 h
 <!-- - [Vxx] error: <exact message> | tried: 1) … 2) … 3) … | hypothesis: … | next independent task taken: Vyy -->
 
 ## WAITING ON OWNER
+git push origin v3
+Owner decision: whether to pursue an external reference (see reports/v3_external_data.md).
 <!-- exact command or decision needed -->
 
 ## Notes for next session
@@ -77,4 +84,16 @@ Docker (`docker ps -a --filter name=twinloop`, 2026-10-27, needs `sg docker -c`)
   V10-V12 must wait for them; never stop them), twinloop-serve-v2-{api,worker,db}-1.
 - Exited: twinloop-v2-evalv3-s0/s1/s2, twinloop-v2-server.
 Host `ls /data` fails (data is container-path /data = $HOME/twinloop-data); use ./scripts/dk for paths.
+v3 summary (2026-10-27):
+1. Phase A ran in full on 640 v2_train cases (0 failures, 0.4 h CPU). No GPU used: 0 of 96 h.
+2. A2 (V03): lumen dataset NOT misaligned; half-max vs label IoU 0.398 (fresh CPR of GT 0.404) = shape mismatch. dataset_aligned=false, arm 3 excluded.
+3. A1 (V04): modplus GT lesions on sel cases 777/634/284/85/11 for σ_s 0/0.5/1/1.5/2 mm; survival under σ_b 0.5 blur 0.048/0.038/0.025/0.024/0.000.
+4. image support: 5 % of non-calcified D0 modplus lesions have half-max image_ds >= 0.25; median iou_ref 0.357, halfmax_usable=false.
+5. G1 (V05) FAILED: no definition reaches retention 0.80 (best 0.048). σ* = null. V06–V13 skipped; H4 never run, no hypothesis verdict.
+6. Phase C (V14): reports/v3_external_data.md; no public CCTA set with QCA/FFR at scale found; small candidates (ICADD 70 with invasive FFR, CT-FFR benchmark 29, Rotterdam 48) need access checks by the owner.
+7. Open: D-V3-V02d: scripts/eval_v3.py is the v2 H3 script; it was never replaced because V06 was skipped. Nothing to do unless v3 continues.
+8. Caveat: "survive" is strict (blurred graph must still show ds >= 0.5 at the lesion); a looser criterion or a different smoothing family was not tried (outside the spec).
+9. v2 containers twinloop-v2-xfit / twinloop-v2-train-lumen-reannot were left untouched.
+10. Pipeline defaults are unchanged (V2Options.radius_smooth_mm = 0.0, golden test passes).
+WAITING ON OWNER: git push origin v3
 <!-- observations, gate results, things the owner should look at -->
