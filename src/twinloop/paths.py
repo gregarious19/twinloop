@@ -38,3 +38,7 @@ def models_dir() -> Path:
 
 def v2_dir() -> Path:
     return data_root() / "v2"
+
+
+def v3_dir() -> Path:
+    return data_root() / "v3"

@@ -24,7 +24,7 @@ tests and ruff pass; firstpass count 160.
 **Verify:** paste outputs of steps 1–6. Expected step 4: `Counter({'v2_train': 640, 'v2_holdout': 87,
 'v2_realfail': 73})` then a number near 85.
 
-## [ ] V01 — Radius smoothing, blur, v3 paths, pipeline option
+## [x] V01 — Radius smoothing, blur, v3 paths, pipeline option
 **Depends on:** V00. **Files:** `src/twinloop/radius_smooth.py`, `src/twinloop/paths.py`,
 `src/twinloop/pipeline.py`, `tests/test_radius_smooth.py`, `tests/test_pipeline_v3.py`.
 **Steps:**

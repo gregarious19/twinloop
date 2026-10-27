@@ -15,6 +15,13 @@ nnUNet_raw/preprocessed/results = /data/nnUNet_*  (nnUNet_compile=true, n_proc_D
 /data/v2/datasets/lumen: files like 0002_tree_0_b0_clean.npz / _jit.npz ; lumen_reannot: 19634 entries
 nvidia-smi: GB10, memory.used N/A (unified memory); free -g: 92 GB available
 ```
+- [V01] 2026-10-27 — radius_smooth.py (smooth_radius/trees/graph, blur_mask), paths.v3_dir, V2Options.radius_smooth_mm + call in run_pipeline, golden phantom JSON (tests/data/v3_golden_stenosis.json) — verification:
+```
+pytest tests/test_radius_smooth.py tests/test_pipeline_v3.py: 8 passed
+pytest -q: 154 passed, 2 deselected (146 + 8 new)
+ruff check: All checks passed ; ruff format --check: 105 files already formatted
+```
+Note: blur_mask follows SPEC §4.1 (same procedure as diag_v2b.blurred, which uses the identical sigma/threshold).
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>

@@ -33,6 +33,7 @@ from twinloop.lesions import Lesion, detect_lesions
 from twinloop.lumen import refine_radii
 from twinloop.modelio import load_model
 from twinloop.radius import area_eq_radii
+from twinloop.radius_smooth import smooth_trees
 from twinloop.repair import RulesDecider, run_repair
 from twinloop.schema import (
     DISCLAIMER,
@@ -63,6 +64,7 @@ class V2Options:
     lumen_radius_out: Literal["eq", "ins"] = "eq"  # defaults = old lumen behaviour
     lumen_fallback: Literal["v1", "nearest", "interp"] = "v1"
     lumen_sigma: float = 1.0
+    radius_smooth_mm: float = 0.0  # SPEC_V3 §4.2 profile smoothing (0 = off)
 
 
 def _empty_anatomy(message: str) -> Anatomy:
@@ -242,6 +244,8 @@ def run_pipeline(
             stats=lumen_stats,
         )
         lumen_s = time.perf_counter() - t_l
+    if v2 is not None and v2.radius_smooth_mm > 0:
+        smooth_trees(trees, v2.radius_smooth_mm)
     lesion_maps = [_lesions_for_tree(tree, params) for tree in trees]
     centerline_s = time.perf_counter() - t
 
