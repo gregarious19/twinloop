@@ -419,3 +419,22 @@ FFR unvalidated. Single-centre data. One deployed seed per network. Synthetic da
 **Steps:** run (3 shards), merge, report with the SPEC §13c verdict and secondary FFR table; if SUPPORTED set `V2Options` defaults `lumen_model="lumen_v3"` and the frozen refine options (lumen stays off), else change no default; log; commit `S24: H3 lumen v3 evaluation`; no push (`WAITING ON OWNER: git push origin v2`).
 **Acceptance:** every (case, source) row present (failures kept with error), no empty cells in H3_RESULTS.md; pytest + ruff pass.
 **Verify:** `./scripts/dk python -c "import pandas as pd; c=pd.read_csv('reports/v3_cases.csv'); print(c.groupby('source').status.value_counts().to_dict())"`
+
+---
+
+## [x] S27 — re-annotated lumen dataset (renumbered from S25: ID clash; done, see reports/v3_lumen_reannot.md)
+**Depends on:** S23 dataset. CPU only. Output `/data/v2/datasets/lumen_reannot/` (same file names, same keys plus `mask_label`, `mask_auto`); the original dataset is not modified.
+**Files:** `scripts/make_lumen_reannot.py`, `reports/v3_lumen_reannot.md`.
+**Steps:**
+1. Per slice, auto mask = half-maximum region (peak = 90th pct of the Gaussian(0.6)-smoothed HU within 1.0 mm of the centre, bg = 15th pct of the slice, threshold = (peak + bg) / 2, connected component of the brightest centre pixel, holes filled). Same rule as the 6-slice sample shown to the owner.
+2. `mask` = pixelwise minimum (AND) of the auto mask and the stored label mask, reduced to its centre component (`center_component`); if that is empty the stored label mask is kept (flag `fell_back`). `ds` is copied unchanged (it comes from the GT graph radii, not from these masks).
+3. Report counts: files, slices, mean areas, shrink ratio per `ds` bin, slices that fell back to the label.
+**Acceptance:** all files written; report has no empty cells; ruff passes. The new masks are NOT validated against anything; no model is trained on them here.
+
+---
+
+## [x] S28 cancelled — LumenNet on the re-annotated dataset (renumbered from S26; superseded by v3, docs/SPEC_V3.md arm 3)
+**Depends on:** S25. Same architecture, recipe and 3 seeds as S23 (`train/train_lumen_v3.py`, 30 000 steps, batch 4), `--data /data/v2/datasets/lumen_reannot`, outputs `/data/v2/runs/lumen_v3_reannot/seed{0,1,2}`. Targets = S25 `mask` (min of auto and label; fallback = label; fallback slices kept as targets).
+**Files:** `train/train_lumen_v3.py` (option `--val-extra-key`, default off), `reports/v3_lumen_reannot_training.md`.
+**Rules:** validation (case_id % 10 == 3, jit only) is scored against the S25 mask (selection and the 25 % kill rule, as in S23) AND against the original label (`mask_label`, comparable with the S23 numbers). The model is NOT exported, no `V2Options` default changes, and it is NOT evaluated on the H3 set (H3 was run once, S24). No test, v2_holdout or v2_realfail case is used.
+**Acceptance:** 3 seeds finished or killed (reported); ruff passes; report has no empty cells.

@@ -106,15 +106,18 @@ def loss_fn(logits, y, ds, pad):
 
 
 @torch.no_grad()
-def validate(model, files, device) -> dict:
-    """Mean |r(pred) - r(GT)| in mm per bin for r_ins_2d and r_eq (slices with a GT lumen)."""
+def validate(model, files, device, key: str = "mask") -> dict:
+    """Mean |r(pred) - r(GT)| in mm per bin for r_ins_2d and r_eq (slices with a GT lumen).
+
+    `key` names the npz array used as GT (S26: `mask_label` scores against the original label).
+    """
     was_training = model.training
     model.eval()
     errs = {(m, b): [] for m in ("ins", "eq") for b in BIN_NAMES}
     for f in files:
         d = np.load(f)
         x = d["img"].astype(np.float32)
-        gt = d["mask"]
+        gt = d[key]
         ds = np.nan_to_num(d["ds"].astype(np.float32), nan=0.0)
         with torch.autocast("cuda", dtype=torch.bfloat16):
             logits = _predict_logits(model, x, CP, device)
@@ -153,6 +156,7 @@ def main() -> int:
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--bench", type=int, default=0, help="time N steps, print s/step, exit")
+    ap.add_argument("--val-extra-key", default="", help="also validate against this npz array")
     ap.add_argument("--eval-old", action="store_true", help="validate the deployed `lumen` model")
     a = ap.parse_args()
     device = "cuda"
@@ -194,7 +198,8 @@ def main() -> int:
     log_path = out / "train_log.csv"
     t_off = last_elapsed(log_path) if not a.bench else 0.0
     cols = ["step", "loss", "lr", "val_metric", "ins_healthy", "ins_mild", "eq_healthy",
-            "eq_mild", "eq_modplus", "elapsed_s"]  # fmt: skip
+            "eq_mild", "eq_modplus", "x_ins_healthy", "x_ins_mild", "x_ins_modplus",
+            "elapsed_s"]  # fmt: skip
     log = CsvLogger(log_path if not a.bench else out / "bench_log.csv", cols)
     kill_step = int(0.25 * a.steps)
     best_step = best_step_from_log(log_path, best) if step else 0
@@ -224,12 +229,13 @@ def main() -> int:
                     f"BENCH {a.bench} steps: {(time.time() - t0) / a.bench:.3f} s/step", flush=True
                 )
                 return 0
-            val = None
+            val, xval = None, {}
             if step % 2000 == 0 or step == kill_step or step == a.steps:
                 val = validate(model, va_files, device)
+                xval = validate(model, va_files, device, a.val_extra_key) if a.val_extra_key else {}
                 m = val["ins_modplus"]
                 if np.isfinite(m) and m < best:
-                    best, best_step, best_res = m, step, {**val, "step": step}
+                    best, best_step, best_res = m, step, {**val, "step": step, "extra": xval}
                     torch.save(model.state_dict(), out / "best.pt")
                     write_json(out / "best_val.json", best_res)
             if step % 100 == 0 or val is not None:
@@ -240,6 +246,7 @@ def main() -> int:
                         eq_healthy="" if val is None else f"{val['eq_healthy']:.5f}",
                         eq_mild="" if val is None else f"{val['eq_mild']:.5f}",
                         eq_modplus="" if val is None else f"{val['eq_modplus']:.5f}",
+                        **{f"x_ins_{b}": f"{xval[f'ins_{b}']:.5f}" for b in BIN_NAMES if xval},
                         elapsed_s=f"{elapsed:.0f}")  # fmt: skip
                 losses = []
                 if step % 100 == 0:
