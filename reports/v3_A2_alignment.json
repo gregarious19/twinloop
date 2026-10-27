@@ -1,0 +1,11 @@
+{
+  "identity_median_iou": 0.39768339768339767,
+  "best_transform": "identity",
+  "best_shift": [
+    0,
+    -1
+  ],
+  "best_median_iou": 0.40298507462686567,
+  "fresh_identity_median_iou": 0.40359897172236503,
+  "dataset_aligned": false
+}

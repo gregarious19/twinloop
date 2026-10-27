@@ -65,7 +65,7 @@ equals `sum(len(detect_lesions(b)))` over GT branches of those cases (print both
 `image_ds`, `iou_ref` non-empty for most rows; runtime per case printed (< 120 s).
 **Verify:** `head -3 /data/v3/audit/slice.csv`; `./scripts/dk cat /data/v3/audit/slice.md`; paste the lesion-count check.
 
-## [ ] V03 — A2: lumen-dataset alignment diagnosis (CPU)
+## [x] V03 — A2: lumen-dataset alignment diagnosis (CPU)
 **Depends on:** V02 (uses `auto_mask`). **Files:** `scripts/v3_a2_alignment.py`,
 `reports/v3_A2_alignment.md`, `reports/v3_A2_alignment.json`.
 **Steps:** exactly §6.1 steps 1–5 and the outcome rule.

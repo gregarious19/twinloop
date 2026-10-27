@@ -31,6 +31,15 @@ slice.md: median iou_ref over all D0 lesions 0.358; halfmax_usable: False (3 cas
 pytest -q: 156 passed, 2 deselected (154 + 2 halfmax) ; ruff check / format: clean
 ```
 Surprising: image_ds is 0 for most lesions (half-max area at the dip is not smaller than the flank), iou_ref ≈ 0.3–0.45. Both are consistent with the v2 findings; the full audit (V04) decides. Decisions D-V3-V02a–d logged (d = eval_v3.py name clash).
+- [V03] 2026-10-27 — A2 alignment diagnosis (scripts/v3_a2_alignment.py) — verification:
+```
+8131 healthy slices from 200 files
+shape mismatch (identity 0.398, best 0.403 < 0.6)
+{"identity_median_iou": 0.3977, "best_transform": "identity", "best_shift": [0, -1],
+ "best_median_iou": 0.4030, "fresh_identity_median_iou": 0.4036, "dataset_aligned": false}
+clean 0.397 / jit 0.399 ; fresh CPR of GT (20 branches, 5 dev cases, 755 slices) 0.404
+```
+Verdict: NOT a misalignment (no transform/shift helps; the fresh straightening of the GT gives the same IoU): half-max and label disagree in shape. dataset_aligned=false, so arm 3 (V11) will be skipped per §9.2.
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>
@@ -38,7 +47,7 @@ Surprising: image_ds is 0 for most lesions (half-max area at the dip is not smal
 -->
 
 ## In progress
-<!-- task, container name, start time (UTC), how to check, expected end -->
+V04: container twinloop-v3-audit (CPU, 8 workers), started 2026-10-27 09:04 UTC, check `sg docker -c "docker logs --tail 5 twinloop-v3-audit"`; limit 4 h; output /data/v3/audit/lesions.csv (resumable).
 
 ## BLOCKED
 <!-- - [Vxx] error: <exact message> | tried: 1) … 2) … 3) … | hypothesis: … | next independent task taken: Vyy -->
