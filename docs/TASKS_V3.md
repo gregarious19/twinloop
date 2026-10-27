@@ -73,7 +73,7 @@ equals `sum(len(detect_lesions(b)))` over GT branches of those cases (print both
 three in §6.1; the clean/jit split is shown.
 **Verify:** `cat reports/v3_A2_alignment.json` and the verdict line.
 
-## [ ] V04 — A1: full lesion audit on all 640 v2_train cases (CPU)
+## [x] V04 — A1: full lesion audit on all 640 v2_train cases (CPU)
 **Depends on:** V02. **Files:** `/data/v3/audit/lesions.csv`, `reports/v3_A1_lesion_audit.md`.
 **Steps:**
 1. Run detached: `./scripts/dkd twinloop-v3-audit python -u scripts/v3_lesion_audit.py --cases all

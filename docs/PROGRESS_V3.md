@@ -40,6 +40,13 @@ shape mismatch (identity 0.398, best 0.403 < 0.6)
 clean 0.397 / jit 0.399 ; fresh CPR of GT (20 branches, 5 dev cases, 755 slices) 0.404
 ```
 Verdict: NOT a misalignment (no transform/shift helps; the fresh straightening of the GT gives the same IoU): half-max and label disagree in shape. dataset_aligned=false, so arm 3 (V11) will be skipped per §9.2.
+- [V04] 2026-10-27 — A1 full lesion audit, 640 v2_train cases, σ_s 0/0.5/1/1.5/2, container twinloop-v3-audit (CPU, 8 workers, 09:04–~09:27 UTC, ≈0.4 h, exit 0) — verification:
+```
+distinct case_ids 640, failed rows 0   (CSV /data/v3/audit/lesions.csv, report reports/v3_A1_lesion_audit.md)
+sel modplus lesions per σ_s: 777 / 634 / 284 / 85 / 11 ; survive σ_b 0.5: 0.05 / 0.04 / 0.02 / 0.02 / 0.00
+median iou_ref over all D0 lesions: 0.357; halfmax_usable: False
+```
+Surprising: even σ_s 2.0 mm leaves almost no modplus lesions and none of those survive a σ_b 0.5 mm blur.
 <!-- - [V00] YYYY-MM-DD — <one line> — verification:
 ```
 <output>
@@ -47,7 +54,7 @@ Verdict: NOT a misalignment (no transform/shift helps; the fresh straightening o
 -->
 
 ## In progress
-V04: container twinloop-v3-audit (CPU, 8 workers), started 2026-10-27 09:04 UTC, check `sg docker -c "docker logs --tail 5 twinloop-v3-audit"`; limit 4 h; output /data/v3/audit/lesions.csv (resumable).
+(none running)
 
 ## BLOCKED
 <!-- - [Vxx] error: <exact message> | tried: 1) … 2) … 3) … | hypothesis: … | next independent task taken: Vyy -->
