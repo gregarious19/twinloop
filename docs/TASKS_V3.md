@@ -7,7 +7,7 @@ Log every GPU job's wall hours in PROGRESS_V3 ("GPU hours used: x of 96").
 
 ---
 
-## [ ] V00 — Session setup and state check
+## [x] V00 — Session setup and state check
 **Depends on:** nothing. **Files:** docs/PROGRESS_V3.md.
 **Steps:**
 1. `uname -m` → `aarch64`; `git branch --show-current` → `v3`; `git log --oneline -3` shows
